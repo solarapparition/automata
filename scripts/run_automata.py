@@ -1,3 +1,5 @@
+"""Run a specific automaton and its sub-automata."""
+
 from functools import lru_cache
 import functools
 from pathlib import Path
