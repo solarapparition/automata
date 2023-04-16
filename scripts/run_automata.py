@@ -215,7 +215,9 @@ def load_automaton(name: str) -> Automaton:
     )
     automaton = Tool(
         name,
-        add_handling(agent_executor.run, f"\n\n---{name}---"),
+        add_handling(
+            agent_executor.run, f"\n\n---{name}: Start---", f"\n\n---{name}: End---"
+        ),
         description_and_input,
     )
     return automaton
