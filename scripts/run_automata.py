@@ -150,17 +150,23 @@ def create_automaton_prompt(
     return prompt
 
 
-def add_handling(run: Callable, printout: str) -> Callable:
+def add_handling(run: Callable, preprint: str, postprint: str) -> Callable:
     """Handle errors during execution of a query."""
 
     @functools.wraps(run)
     def wrapper(*args, **kwargs):
-        print(printout)
+        print(preprint)
         try:
-            return run(*args, **kwargs)
-        except ValueError as error:
+            result = run(*args, **kwargs)
+            print(postprint)
+            return result
+        except Exception as error:
             # ignore errors since delegators should handle automaton failures
             return str(error).replace("Could not parse LLM output: ", "").strip("`")
+        except KeyboardInterrupt:
+            # manual interruption should take process to the delegator
+            print(postprint)
+            return "Sub-automaton was interrupted."
 
     return wrapper
 
