@@ -19,6 +19,16 @@ from langchain.agents import (
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import BaseLLM, OpenAI
 from langchain.tools import BaseTool
+from langchain.prompts.chat import ChatPromptTemplate
+from langchain.chat_models import ChatOpenAI
+from langchain import PromptTemplate, LLMChain
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
 import yaml
 
 sys.path.append("")
@@ -65,23 +75,11 @@ def find_model(reasoning_type: str) -> BaseLLM:
     return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
 
-from langchain.prompts.chat import ChatPromptTemplate
-
-
 def load_tool_wrapper(name: str, description: str, reasoning_type: str) -> Automaton:
     """Load a base tool. Supports all tools in the langchain library, as well as Rank 0 automata."""
-    from langchain.chat_models import ChatOpenAI
-    from langchain import PromptTemplate, LLMChain
-    from langchain.prompts.chat import (
-        ChatPromptTemplate,
-        SystemMessagePromptTemplate,
-        AIMessagePromptTemplate,
-        HumanMessagePromptTemplate,
-    )
-    from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
     llm = find_model(reasoning_type)
-    supported_lc_tools = ["llm-math", "terminal"]
+    supported_lc_tools = ["llm-math", "Terminal"]
     custom_tools = ["Writing Generator", "Analysis Assistant", "Coding Assistant"]
 
     if name == "Terminal":
@@ -97,11 +95,9 @@ def load_tool_wrapper(name: str, description: str, reasoning_type: str) -> Autom
         [system_message_prompt, human_message_prompt]
     )
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-    chain = LLMChain(llm=llm, prompt=chat_prompt)
-    if name in supported_lc_tools:
-        return load_tools([name], llm)[0]
+    assistant_chain = LLMChain(llm=llm, prompt=chat_prompt)
     if name in ["Writing Generator", "Coding Assistant"]:
-        return Tool(name, chain.run, description=description)
+        return Tool(name, assistant_chain.run, description=description)
 
     raise NotImplementedError(
         f"Unsupported tool name: {name}. Only {supported_lc_tools + custom_tools} are supported for now."
