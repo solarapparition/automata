@@ -7,4 +7,4 @@ imperatives:
 rank: 2
 reasoning_type: fast
 role: orchestrator
-sub_automata: [writing_assistant, terminal, calculator, document_checker]
+sub_automata: [calculator, document_checker, terminal, writing_assistant]

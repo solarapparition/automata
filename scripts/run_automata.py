@@ -87,7 +87,7 @@ def load_tool_wrapper(name: str, description: str, reasoning_type: str) -> Autom
     if name in supported_lc_tools:
         return load_tools([name], llm)[0]
 
-    template = "You are a helpful assistant who can help generate a variety of content."
+    template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
     human_template = "{text}"
     human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
@@ -222,7 +222,7 @@ def load_automaton(name: str) -> Automaton:
 def main():
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
-        "Create a math quiz suitable for a freshman college student, with 10 questions, and include the answer key. Write the quiz to a file called `quiz.txt`, and verify that the answers in the quiz are correct, and that all the questions were generated."
+        "Create a math quiz suitable for a freshman college student, with 10 questions, and include the answer key. Write the quiz to a file called `quiz.txt`, and verify that the answers in the quiz are correct, and that all the answers were written to the file."
     )
 
 

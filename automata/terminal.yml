@@ -1,6 +1,6 @@
 name: "Terminal"
 description: "Executes commands in a terminal. Output will be any output from running that command."
-input_requirements: 1) not `nano` or `vim`, 2) valid commands for the terminal
+input_requirements: 1) do NOT use `nano` or `vim`, 2) valid commands for the terminal
 imperatives: null
 rank: 0
 reasoning_type: "fast"

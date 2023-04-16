@@ -3,7 +3,6 @@ instruction: Examine the material that you have been given and critique it. If i
 imperatives:
 - Point out all potential flaws, no matter how small or unlikely.
 - Check any reasonable requirement that material ought to satisfy, given the known context.
-
 output_format: |
   Your output must have the following format:
   ```
