@@ -7,4 +7,4 @@ imperatives:
 rank: 1
 reasoning_type: fast
 role: critic
-sub_automata: [terminal, llm-math]
+sub_automata: [terminal, calculator]
