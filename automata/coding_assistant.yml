@@ -1,0 +1,8 @@
+name: "Code Generator"
+description: "A coding writing assistant powered by a large language model that can help generate and improve. It cannot read or write files, or browse the internet."
+input_requirements: "1) A descriptive text prompt containing all information (including code) needed to generate or update code content. 2) No references to local hard drive files or previous interactions."
+imperatives: null
+rank: 0
+reasoning_type: "careful"
+role: null
+sub_automata: null

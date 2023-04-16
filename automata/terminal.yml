@@ -1,0 +1,8 @@
+name: "terminal"
+description: "Wrapper around Langchain's `terminal` tool."
+input_requirements: null
+imperatives: null
+rank: 0
+reasoning_type: "fast"
+role: null
+sub_automata: null

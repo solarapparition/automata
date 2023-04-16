@@ -1,0 +1,10 @@
+name: Quiz Creator
+description: Can create quizzes for a particular subject.
+input_requirements: Must have the quiz's subject matter, and the difficulty of the questions.
+imperatives:
+  - Verify that the answers to the quiz questions exist and are correct.
+  - Verify that the quiz file exists and contains the quiz.
+rank: 2
+reasoning_type: fast
+role: orchestrator
+sub_automata: [writing_assistant, terminal, calculator, document_checker]

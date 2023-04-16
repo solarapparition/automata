@@ -1,0 +1,8 @@
+name: "Analysis Assistant"
+description: "This is an analysis assistant who perform analysis on some material."
+input_requirements: "Must have the full text of the material to be analyzed; must have analysis task."
+imperatives: null
+rank: 0
+reasoning_type: "careful"
+role: null
+sub_automata: null
