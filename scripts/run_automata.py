@@ -84,6 +84,11 @@ def load_tool_wrapper(name: str, description: str, reasoning_type: str) -> Autom
     supported_lc_tools = ["llm-math", "terminal"]
     custom_tools = ["Writing Generator", "Analysis Assistant", "Coding Assistant"]
 
+    if name == "Terminal":
+        return Tool(name, load_tools(["terminal"])[0].run, description=description)
+    if name in supported_lc_tools:
+        return load_tools([name], llm)[0]
+
     template = "You are a helpful assistant who can help generate a variety of content."
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
     human_template = "{text}"
