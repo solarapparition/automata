@@ -1,6 +1,8 @@
 name: Writing Generator
 description: A writing generator that can help you generate content.
-input_requirements: 1) Must not reference interaction with local files, internet, or previous interactions. 2) A descriptive text prompt for the generated content.
+input_requirements:
+  - include a descriptive text prompt for the generated content.
+  - must not reference interaction with local files, internet, or previous interactions
 imperatives: null
 rank: 0
 engine: gpt-3.5-turbo

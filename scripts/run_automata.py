@@ -116,15 +116,17 @@ def create_automaton_prompt(
     name: str,
     description: str,
     rank: int,
-    input_requirements: str,
+    input_requirements: List[str],
     self_imperatives: List[str],
     role_info: Dict[str, str],
     sub_automata: List[Tool],
 ) -> PromptTemplate:
     """Put together a prompt for an automaton."""
+
+    input_requirements = "\n".join([f"- {req}" for req in input_requirements])
     # global_imperative = ["- All of your outputs MUST either include `Action:` and `Action Input:`, OR include `Final Answer:`."]
     imperatives = role_info["imperatives"] + self_imperatives
-    imperatives = "- " + "\n- ".join(imperatives)
+    imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
     imperatives = f"You have several heuristic imperatives, all of equal importance:\n{imperatives}"
     prefix = AUTOMATON_AFFIXES["prefix"].format(
         # name=name,
