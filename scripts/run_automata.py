@@ -47,25 +47,6 @@ class Automaton(Protocol):
     """Description of the automata. Viewable to delegators."""
 
 
-def create_automaton(
-    name: str, description: str, loaded_tools: List[Union[str, BaseTool]], llm: BaseLLM
-):
-    """Create an automaton with a list of tools."""
-    loaded_tools: List[BaseTool] = [
-        load_tools([tool], llm)[0] if isinstance(tool, str) else tool
-        for tool in loaded_tools
-    ]
-    agent = initialize_agent(
-        loaded_tools,
-        llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=True
-        # loaded_tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
-    )
-    automata = Tool(name, agent.run, description)
-    return automata
-
-
 def find_model(engine: str) -> BaseLLM:
     """Find the model to use for a given reasoning type."""
     if engine is None:
@@ -113,9 +94,6 @@ def get_role_info(role: str) -> Dict:
 
 
 def create_automaton_prompt(
-    name: str,
-    description: str,
-    rank: int,
     input_requirements: List[str],
     self_imperatives: List[str],
     role_info: Dict[str, str],
@@ -129,9 +107,6 @@ def create_automaton_prompt(
     imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
     imperatives = f"You have several heuristic imperatives, all of equal importance:\n{imperatives}"
     prefix = AUTOMATON_AFFIXES["prefix"].format(
-        # name=name,
-        # description=description,
-        # rank=rank,
         input_requirements=input_requirements,
         role_description=role_info["description"],
         role_instruction=role_info["instruction"],
@@ -148,8 +123,10 @@ def create_automaton_prompt(
     return prompt
 
 
-def add_handling(run: Callable, preprint: str, postprint: str) -> Callable:
+def add_run_handling(run: Callable, name: str) -> Callable:
     """Handle errors during execution of a query."""
+    preprint = f"\n\n---{name}: Start---"
+    postprint = f"\n\n---{name}: End---"
 
     @functools.wraps(run)
     def wrapper(*args, **kwargs):
@@ -159,12 +136,12 @@ def add_handling(run: Callable, preprint: str, postprint: str) -> Callable:
             print(postprint)
             return result
         except Exception as error:
-            # ignore errors since delegators should handle automaton failures
+            # ignore all errors since delegators should handle automaton failures
             return str(error).replace("Could not parse LLM output: ", "").strip("`")
         except KeyboardInterrupt:
-            # manual interruption should take process to the delegator
+            # manual interruption should escape back to the delegator
             print(postprint)
-            return "Sub-automaton was interrupted."
+            return "Sub-automaton took too long to process and was stopped."
 
     return wrapper
 
@@ -189,9 +166,6 @@ def load_automaton(file_name: str) -> Automaton:
     sub_automata = data["sub_automata"]
     sub_automata = [load_automaton(name) for name in sub_automata]
     prompt = create_automaton_prompt(
-        name=name,
-        description=description_and_input,
-        rank=data["rank"],
         input_requirements=data["input_requirements"],
         self_imperatives=data["imperatives"],
         role_info=get_role_info(data["role"]),
@@ -213,9 +187,7 @@ def load_automaton(file_name: str) -> Automaton:
     )
     automaton = Tool(
         name,
-        add_handling(
-            agent_executor.run, f"\n\n---{name}: Start---", f"\n\n---{name}: End---"
-        ),
+        add_run_handling(agent_executor.run, name=name),
         description_and_input,
     )
     return automaton
