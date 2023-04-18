@@ -66,19 +66,19 @@ def create_automaton(
     return automata
 
 
-def find_model(reasoning_type: str) -> BaseLLM:
+def find_model(engine: str) -> BaseLLM:
     """Find the model to use for a given reasoning type."""
-    if reasoning_type == "fast":
-        return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-    if reasoning_type == "careful":
-        return ChatOpenAI(temperature=0, model_name="gpt-4")
-    return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+    if engine is None:
+        return None
+    if engine in ["gpt-3.5-turbo", "gpt-4"]:
+        return ChatOpenAI(temperature=0, model_name=engine)
+    raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def load_tool_wrapper(name: str, description: str, reasoning_type: str) -> Automaton:
+def load_tool_wrapper(name: str, description: str, engine: str) -> Automaton:
     """Load a base tool. Supports all tools in the langchain library, as well as Rank 0 automata."""
 
-    llm = find_model(reasoning_type)
+    llm = find_model(engine)
     supported_lc_tools = ["llm-math", "Terminal"]
     custom_tools = ["Writing Generator", "Analysis Assistant", "Coding Assistant"]
 
@@ -175,15 +175,15 @@ def load_automaton(name: str) -> Automaton:
         Loader=yaml.FullLoader,
     )
     name = data["name"]
-    reasoning_type = data["reasoning_type"]
+    engine = data["engine"]
     description_and_input = (
         data["description"] + f" Input requirements: {data['input_requirements']}"
     )
 
     if data["rank"] == 0:  # load base tools directly
-        return load_tool_wrapper(name, description_and_input, reasoning_type)
+        return load_tool_wrapper(name, description_and_input, engine)
 
-    llm = find_model(reasoning_type)
+    llm = find_model(engine)
     sub_automata = data["sub_automata"]
     sub_automata = [load_automaton(name) for name in sub_automata]
     prompt = create_automaton_prompt(

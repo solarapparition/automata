@@ -5,6 +5,6 @@ imperatives:
   - "Calculate the math equation you are given."
   - "Return only the answer."
 rank: 1
-reasoning_type: "fast"
+engine: "gpt-3.5-turbo"
 role: "researcher"
 sub_automata: ["llm-math"]

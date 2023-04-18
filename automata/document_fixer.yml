@@ -4,6 +4,6 @@ input_requirements: 1) a path to the text file; 2) a detailed and specific list 
 imperatives:
   - Fix the document according to the list of changes given.
 rank: 1
-reasoning_type: fast
+engine: gpt-3.5-turbo
 role: worker
 sub_automata: [terminal, calculator]

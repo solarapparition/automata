@@ -1,8 +1,8 @@
-name: "llm-math"
-description: "Wrapper around Langchain's llm-math tool."
+name: llm-math
+description: A function to calculate answers to math equations.
 input_requirements: null
 imperatives: null
 rank: 0
-reasoning_type: "fast"
-role: null
+engine: gpt-3.5-turbo
+role: function
 sub_automata: null

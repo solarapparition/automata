@@ -4,6 +4,6 @@ input_requirements: 1) a path to the code file or directory; 2) a question about
 imperatives:
   - Gain a good conceptual understanding of the code you are given.
 rank: 1
-reasoning_type: careful
+engine: gpt-4
 role: researcher
 sub_automata: [terminal, coding_assistant]

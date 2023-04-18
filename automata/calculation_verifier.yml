@@ -5,6 +5,6 @@ imperatives:
   - Verify that the calculations shown in the file are correct
   - Use the provided calculator tool to verify the calculations
 rank: 1
-reasoning_type: fast
+engine: gpt-3.5-turbo
 role: critic
 sub_automata: [terminal, calculator]

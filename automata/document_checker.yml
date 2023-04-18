@@ -4,6 +4,6 @@ input_requirements: 1) a path to the text file; 2) a detailed description of req
 imperatives:
   - Detect any requirement that the text file must satisfy, that is not satisfied by the text file.
 rank: 1
-reasoning_type: fast
+engine: gpt-3.5-turbo
 role: critic
 sub_automata: [terminal, calculation_verifier]

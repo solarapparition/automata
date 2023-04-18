@@ -4,7 +4,8 @@ input_requirements: Must have the quiz's subject matter, and the difficulty of t
 imperatives:
   - Verify that the answers to the quiz questions exist and are correct.
   - Verify that the quiz file exists and contains the quiz.
-rank: 2
-reasoning_type: fast
-role: orchestrator
-sub_automata: [calculator, document_checker, terminal, writing_assistant]
+rank: 1
+engine: gpt-3.5-turbo
+role: worker
+sub_automata: [terminal, writing_assistant]
+# sub_automata: [calculator, document_checker, terminal, writing_assistant]
