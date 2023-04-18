@@ -170,13 +170,13 @@ def add_handling(run: Callable, preprint: str, postprint: str) -> Callable:
 
 
 @lru_cache(maxsize=None)
-def load_automaton(name: str) -> Automaton:
+def load_automaton(file_name: str) -> Automaton:
     """Load an automaton from a YAML file."""
     data = yaml.load(
-        (Path("automata") / f"{name}.yml").read_text(encoding="utf-8"),
+        (Path("automata") / f"{file_name}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
-    name = data["name"]
+    name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     description_and_input = (
         data["description"] + f" Input requirements: {data['input_requirements']}"
