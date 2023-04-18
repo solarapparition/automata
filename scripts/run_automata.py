@@ -222,7 +222,7 @@ def load_automaton(name: str) -> Automaton:
 def main():
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
-        "Create a math quiz suitable for a freshman college student, with 10 questions, and include the answer key. Write the quiz to a file called `quiz.txt`, and verify that the answers in the quiz are correct, and that all the answers were written to the file."
+        "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file."
     )
 
 
