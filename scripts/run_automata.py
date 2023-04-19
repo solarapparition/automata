@@ -56,17 +56,19 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def load_tool_wrapper(name: str, description: str, engine: str) -> Automaton:
+def load_tool_wrapper(
+    file_name: str, full_name: str, description: str, engine: str
+) -> Automaton:
     """Load a base tool. Supports all tools in the langchain library, as well as Rank 0 automata."""
 
     llm = find_model(engine)
-    supported_lc_tools = ["llm-math", "Terminal"]
-    custom_tools = ["Writing Generator", "Analysis Assistant", "Coding Assistant"]
+    # supported_lc_tools = ["llm-math", "Terminal"]
+    supported_tools = ["writing_assistant"]
 
-    if name == "Terminal":
-        return Tool(name, load_tools(["terminal"])[0].run, description=description)
-    if name in supported_lc_tools:
-        return load_tools([name], llm)[0]
+    # if file_name == "Terminal":
+    # return Tool(full_name, load_tools(["terminal"])[0].run, description=description)
+    # if file_name in supported_lc_tools:
+    # return load_tools([full_name], llm)[0]
 
     template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -77,11 +79,11 @@ def load_tool_wrapper(name: str, description: str, engine: str) -> Automaton:
     )
     system_message_prompt = SystemMessagePromptTemplate.from_template(template)
     assistant_chain = LLMChain(llm=llm, prompt=chat_prompt)
-    if name in ["Writing Generator", "Coding Assistant"]:
-        return Tool(name, assistant_chain.run, description=description)
+    if file_name in ["writing_assistant"]:
+        return Tool(full_name, assistant_chain.run, description=description)
 
     raise NotImplementedError(
-        f"Unsupported tool name: {name}. Only {supported_lc_tools + custom_tools} are supported for now."
+        f"Unsupported tool name: {file_name}. Only {supported_tools} are supported for now."
     )
 
 
@@ -111,7 +113,7 @@ def create_automaton_prompt(
         role_description=role_info["description"],
         imperatives=imperatives,
         role_instruction=role_info["instructions"],
-        self_instruction = instructions,
+        self_instruction=instructions,
     )
     suffix = AUTOMATON_AFFIXES["suffix"]
     prompt = ZeroShotAgent.create_prompt(
@@ -154,14 +156,14 @@ def load_automaton(file_name: str) -> Automaton:
         (Path("automata") / f"{file_name}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
-    name = f"{data['name']} ({data['role']} {data['rank']})"
+    full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     description_and_input = (
         data["description"] + f" Input requirements: {data['input_requirements']}"
     )
 
     if data["rank"] == 0:  # load base tools directly
-        return load_tool_wrapper(name, description_and_input, engine)
+        return load_tool_wrapper(file_name, full_name, description_and_input, engine)
 
     llm = find_model(engine)
     sub_automata = data["sub_automata"]
@@ -187,8 +189,8 @@ def load_automaton(file_name: str) -> Automaton:
         max_execution_time=data["rank"] * 200 + 60,
     )
     automaton = Tool(
-        name,
-        add_run_handling(agent_executor.run, name=name),
+        full_name,
+        add_run_handling(agent_executor.run, name=full_name),
         description_and_input,
     )
     return automaton
