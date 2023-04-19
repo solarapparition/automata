@@ -56,31 +56,28 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def load_tool_wrapper(
-    file_name: str, full_name: str, description: str, engine: str
+def load_function(
+    file_name: str,
+    data: dict
 ) -> Automaton:
-    """Load a base tool. Supports all tools in the langchain library, as well as Rank 0 automata."""
+    """Load a function, which uses the same interface as automata but does not make decisions."""
 
-    llm = find_model(engine)
-    # supported_lc_tools = ["llm-math", "Terminal"]
+    model = find_model(data["engine"])
     supported_tools = ["writing_assistant"]
 
-    # if file_name == "Terminal":
-    # return Tool(full_name, load_tools(["terminal"])[0].run, description=description)
-    # if file_name in supported_lc_tools:
-    # return load_tools([full_name], llm)[0]
+    if file_name == "assistant":
+        template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
+        system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+        human_template = "{text}"
+        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [system_message_prompt, human_message_prompt]
+        )
+        assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
+        return Tool(data["name"], assistant_chain.run, description=data["description"])
 
-    template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
-    system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-    human_template = "{text}"
-    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-    chat_prompt = ChatPromptTemplate.from_messages(
-        [system_message_prompt, human_message_prompt]
-    )
-    system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-    assistant_chain = LLMChain(llm=llm, prompt=chat_prompt)
-    if file_name in ["writing_assistant"]:
-        return Tool(full_name, assistant_chain.run, description=description)
+    if file_name == "null":
+        return Tool(data["name"], lambda x: "I carefully reflected upon my current work and the best way to move forward with it.", description=data["description"])
 
     raise NotImplementedError(
         f"Unsupported tool name: {file_name}. Only {supported_tools} are supported for now."
@@ -143,7 +140,7 @@ def add_run_handling(run: Callable, name: str) -> Callable:
             return result
         except Exception as error:
             # ignore all errors since delegators should handle automaton failures
-            return str(error).replace("Could not parse LLM output: ", "").strip("`")
+            return str(error).replace("Could not parse LLM output: ", "The sub-automaton ran into an error while processing the query. Its last thought was: ").replace("`", "```")
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
             print(postprint)
@@ -171,8 +168,8 @@ def load_automaton(file_name: str) -> Automaton:
         data["description"] + f" Input requirements:\n{input_requirements}"
     )
 
-    if data["rank"] == 0:  # load base tools directly
-        return load_tool_wrapper(file_name, full_name, description_and_input, engine)
+    if data["role"] == "function":  # load base tools directly
+        return load_function(file_name, data)
 
     llm = find_model(engine)
     sub_automata = data["sub_automata"]
