@@ -1,0 +1,8 @@
+name: "Nothing"
+description: Do nothing so that you can reflect upon your tasks more closely.
+input_requirements: null
+instructions: null
+rank: 0
+engine: null
+role: function
+sub_automata: null
