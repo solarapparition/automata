@@ -74,7 +74,10 @@ def load_function(
             [system_message_prompt, human_message_prompt]
         )
         assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
-        return Tool(data["name"], assistant_chain.run, description=data["description"])
+        input_requirements = "\n".join(
+            [f"- {requirement}" for requirement in data['input_requirements']]
+        )
+        return Tool(data["name"], assistant_chain.run, description=f"{data['description']} Input requirements: \n{input_requirements}")
 
     if file_name == "null":
         return Tool(data["name"], lambda x: "I carefully reflected upon my current work and the best way to move forward with it.", description=data["description"])
@@ -94,21 +97,19 @@ def get_role_info(role: str) -> Dict:
 
 def create_automaton_prompt(
     input_requirements: str,
-    self_instructions: str,
+    self_instructions: List[str],
+    self_imperatives: List[str],
     role_info: Dict[str, str],
     sub_automata: List[Tool],
 ) -> PromptTemplate:
     """Put together a prompt for an automaton."""
 
-    imperatives = "\n".join(
-        [f"- {imperative}" for imperative in role_info["imperatives"]]
-    )
-    role_instructions = "\n".join(
-        [f"- {instruction}" for instruction in role_info["instructions"]]
-    )
-    instructions = f"{role_instructions}\n{self_instructions}"
+    imperatives = role_info["imperatives"] + (self_imperatives or [])
+    imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
 
-    self_instructions = f"Instructions:\n{self_instructions}"
+    instructions = role_info["instructions"] + (self_instructions or [])
+    instructions = "\n".join([f"- {instruction}" for instruction in instructions])
+
     prefix = AUTOMATON_AFFIXES["prefix"].format(
         input_requirements=input_requirements,
         role_description=role_info["description"],
@@ -176,7 +177,8 @@ def load_automaton(file_name: str) -> Automaton:
     sub_automata = [load_automaton(name) for name in sub_automata]
     prompt = create_automaton_prompt(
         input_requirements=input_requirements,
-        self_instructions=instructions,
+        self_instructions=data["instructions"],
+        self_imperatives=data["imperatives"],
         role_info=get_role_info(data["role"]),
         sub_automata=sub_automata,
     )

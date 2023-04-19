@@ -3,10 +3,11 @@ description: Can create quizzes for a particular subject.
 input_requirements:
   - must have the quiz's subject matter
   - the difficulty of the questions.
+imperatives: null
 instructions:
   - Verify that the answers to the quiz questions exist and are correct.
   - Verify that the quiz file exists and contains the quiz.
 rank: 1
 engine: gpt-3.5-turbo
 role: worker
-sub_automata: [writing_assistant]
+sub_automata: [llm_assistant]
