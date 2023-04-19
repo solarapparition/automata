@@ -96,24 +96,27 @@ def get_role_info(role: str) -> Dict:
 
 
 def create_automaton_prompt(
-    input_requirements: List[str],
-    instructions: List[str],
+    input_requirements: str,
+    self_instructions: str,
     role_info: Dict[str, str],
     sub_automata: List[Tool],
 ) -> PromptTemplate:
     """Put together a prompt for an automaton."""
 
-    input_requirements = "\n".join([f"- {req}" for req in input_requirements])
-    # global_imperative = ["- All of your outputs MUST either include `Action:` and `Action Input:`, OR include `Final Answer:`."]
-    imperatives = role_info["imperatives"]
-    imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
-    imperatives = f"You have several heuristic imperatives, all of equal importance:\n{imperatives}"
+    imperatives = "\n".join(
+        [f"- {imperative}" for imperative in role_info["imperatives"]]
+    )
+    role_instructions = "\n".join(
+        [f"- {instruction}" for instruction in role_info["instructions"]]
+    )
+    instructions = f"{role_instructions}\n{self_instructions}"
+
+    self_instructions = f"Instructions:\n{self_instructions}"
     prefix = AUTOMATON_AFFIXES["prefix"].format(
         input_requirements=input_requirements,
         role_description=role_info["description"],
         imperatives=imperatives,
-        role_instruction=role_info["instructions"],
-        self_instruction=instructions,
+        instructions=instructions,
     )
     suffix = AUTOMATON_AFFIXES["suffix"]
     prompt = ZeroShotAgent.create_prompt(
@@ -158,8 +161,14 @@ def load_automaton(file_name: str) -> Automaton:
     )
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
+    input_requirements = "\n".join([f"- {req}" for req in data["input_requirements"]])
+    instructions = (
+        "\n".join([f"- {instruction}" for instruction in data["instructions"]])
+        if data["instructions"]
+        else ""
+    )
     description_and_input = (
-        data["description"] + f" Input requirements: {data['input_requirements']}"
+        data["description"] + f" Input requirements:\n{input_requirements}"
     )
 
     if data["rank"] == 0:  # load base tools directly
@@ -169,8 +178,8 @@ def load_automaton(file_name: str) -> Automaton:
     sub_automata = data["sub_automata"]
     sub_automata = [load_automaton(name) for name in sub_automata]
     prompt = create_automaton_prompt(
-        input_requirements=data["input_requirements"],
-        instructions=data["instructions"],
+        input_requirements=input_requirements,
+        self_instructions=instructions,
         role_info=get_role_info(data["role"]),
         sub_automata=sub_automata,
     )
