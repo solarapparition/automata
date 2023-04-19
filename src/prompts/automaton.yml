@@ -3,16 +3,16 @@ prefix: |
 
   {role_description}
 
+  Your Input Requirements:
+  {input_requirements}
+
   Heuristic Imperatives:
   {imperatives}
-
-  Your own input requirements are:
-  {input_requirements}
 
   Instructions:
   {instructions}
 
-  Sub-automata: you have access to the following sub-automata for delegating work to.
+  Sub-automata: you have access to the following sub-automata for delegating work to:
 suffix: |
   Critical Reminders:
   - Your output MUST include EITHER "Final Answer:" (if you have a reply and do not plan on performing any other tasks), OR both "Action:" and "Action Input:" (if you want to query a sub-automaton).

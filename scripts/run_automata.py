@@ -63,9 +63,9 @@ def load_function(
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
     model = find_model(data["engine"])
-    supported_tools = ["writing_assistant"]
+    supported_functions = ["llm_assistant"]
 
-    if file_name == "assistant":
+    if file_name == "llm_assistant":
         template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
         system_message_prompt = SystemMessagePromptTemplate.from_template(template)
         human_template = "{text}"
@@ -83,7 +83,7 @@ def load_function(
         return Tool(data["name"], lambda x: "I carefully reflected upon my current work and the best way to move forward with it.", description=data["description"])
 
     raise NotImplementedError(
-        f"Unsupported tool name: {file_name}. Only {supported_tools} are supported for now."
+        f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
     )
 
 
@@ -160,16 +160,11 @@ def load_automaton(file_name: str) -> Automaton:
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     input_requirements = "\n".join([f"- {req}" for req in data["input_requirements"]])
-    instructions = (
-        "\n".join([f"- {instruction}" for instruction in data["instructions"]])
-        if data["instructions"]
-        else ""
-    )
     description_and_input = (
         data["description"] + f" Input requirements:\n{input_requirements}"
     )
 
-    if data["role"] == "function":  # load base tools directly
+    if data["role"] == "function":  # functions are loaded individually
         return load_function(file_name, data)
 
     llm = find_model(engine)
