@@ -1,5 +1,5 @@
-name: Writing Generator
-description: A writing generator that can help you generate content.
+name: Generative Assistant
+description: An assistant that can help you generate content. Cannot access local files, internet, or previous interactions
 input_requirements:
   - include a descriptive text prompt for the generated content.
   - must not reference interaction with local files, internet, or previous interactions
