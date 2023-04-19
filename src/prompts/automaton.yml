@@ -8,7 +8,9 @@ prefix: |
   Your input requirements are:
   {input_requirements}
 
-  {role_instruction} You have access to the following sub-automata for delegating work to. Always use the best match for the task at hand:
+  {role_instruction}
+  {self_instruction}
+  You have access to the following sub-automata for delegating work to. Always use the best match for the task at hand:
 suffix: |
   Remember, your output MUST include EITHER "Final Answer:" (if you have a reply and do not plan on performing any other tasks), OR both "Action:" and "Action Input:" (if you want to query a sub-automaton). Failing to adhere to this requirement will result in an error.
 

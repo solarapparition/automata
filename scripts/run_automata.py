@@ -95,7 +95,7 @@ def get_role_info(role: str) -> Dict:
 
 def create_automaton_prompt(
     input_requirements: List[str],
-    self_imperatives: List[str],
+    instructions: List[str],
     role_info: Dict[str, str],
     sub_automata: List[Tool],
 ) -> PromptTemplate:
@@ -103,20 +103,21 @@ def create_automaton_prompt(
 
     input_requirements = "\n".join([f"- {req}" for req in input_requirements])
     # global_imperative = ["- All of your outputs MUST either include `Action:` and `Action Input:`, OR include `Final Answer:`."]
-    imperatives = role_info["imperatives"] + self_imperatives
+    imperatives = role_info["imperatives"]
     imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
     imperatives = f"You have several heuristic imperatives, all of equal importance:\n{imperatives}"
     prefix = AUTOMATON_AFFIXES["prefix"].format(
         input_requirements=input_requirements,
         role_description=role_info["description"],
-        role_instruction=role_info["instruction"],
         imperatives=imperatives,
+        role_instruction=role_info["instructions"],
+        self_instruction = instructions,
     )
+    suffix = AUTOMATON_AFFIXES["suffix"]
     prompt = ZeroShotAgent.create_prompt(
         sub_automata,
         prefix=prefix,
-        suffix=AUTOMATON_AFFIXES["suffix"],  # .replace(
-        # "{imperatives}", imperatives),
+        suffix=suffix,
         input_variables=["input", "agent_scratchpad"],
         format_instructions=role_info["output_format"],
     )
@@ -167,7 +168,7 @@ def load_automaton(file_name: str) -> Automaton:
     sub_automata = [load_automaton(name) for name in sub_automata]
     prompt = create_automaton_prompt(
         input_requirements=data["input_requirements"],
-        self_imperatives=data["imperatives"],
+        instructions=data["instructions"],
         role_info=get_role_info(data["role"]),
         sub_automata=sub_automata,
     )

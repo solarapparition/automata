@@ -3,7 +3,7 @@ description: Can create quizzes for a particular subject.
 input_requirements:
   - must have the quiz's subject matter
   - the difficulty of the questions.
-imperatives:
+instructions:
   - Verify that the answers to the quiz questions exist and are correct.
   - Verify that the quiz file exists and contains the quiz.
 rank: 1
