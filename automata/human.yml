@@ -1,6 +1,7 @@
 name: Human
-description: A human who can provide information and feedback when you are stuck.
-input_requirements: null
+description: A human who can provide information and feedback, and perform manual tasks when you have no other sub-automata to do so.
+input_requirements:
+  - an explanation of what you need help with
 imperatives: null
 instructions: null
 rank: 0
