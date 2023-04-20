@@ -1,0 +1,9 @@
+name: Human
+description: A human who can provide information and feedback when you are stuck.
+input_requirements: null
+imperatives: null
+instructions: null
+rank: 0
+engine: null
+role: function
+sub_automata: null

@@ -80,7 +80,16 @@ def load_function(
         return Tool(data["name"], assistant_chain.run, description=f"{data['description']} Input requirements: \n{input_requirements}")
 
     if file_name == "null":
-        return Tool(data["name"], lambda x: "I carefully reflected upon my current work and the best way to move forward with it.", description=data["description"])
+        return Tool(
+            data["name"],
+            lambda x: "I carefully reflected upon my current work and the best way to move forward with it.",
+            description=data["description"],
+        )
+
+    if file_name == "human":
+        return Tool(
+            data["name"], load_tools(["human"])[0].run, description=data["description"]
+        )
 
     raise NotImplementedError(
         f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
