@@ -192,9 +192,24 @@ def add_run_handling(
     return wrapper
 
 
+class AutomatonAgent(ZeroShotAgent):
+    def _extract_tool_and_input(self, text: str) -> Optional[Tuple[str, str]]:
+        """Extract the tool and input from the text, with handling for when automata do not specify the correct action and input."""
+        try:
+            # from langchain.agents.mrkl.base import get_action_and_input
+            # return get_action_and_input(text)
+            return super()._extract_tool_and_input(text)
+        except ValueError:
+            return (
+                "Reflect",
+                "I didn't post my output in the correct format. I need to adjust my output.",
+            )
+
+
 @lru_cache(maxsize=None)
-def load_automaton(file_name: str) -> Automaton:
+def load_automaton(file_name: str, suppress_errors: bool = False) -> Automaton:
     """Load an automaton from a YAML file."""
+
     data = yaml.load(
         (Path("automata") / f"{file_name}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
