@@ -58,7 +58,7 @@ def find_model(engine: str) -> BaseLLM:
 
 
 def save_file(action_input: str, function_name: str) -> str:
-    """Save a file to the scratchpad."""
+    """Save a file."""
     try:
         input_json = json.loads(action_input)
         path = input_json["path"]
@@ -68,6 +68,20 @@ def save_file(action_input: str, function_name: str) -> str:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(str(content), encoding="utf-8")
     return f"{function_name}: saved file to `{path}`"
+
+
+def load_file(action_input: str, function_name: str) -> str:
+    """Load a file."""
+    try:
+        input_json = json.loads(action_input)
+        path = input_json["path"]
+    except (KeyError, json.JSONDecodeError):
+        return "Could not parse input. Please provide the input in the following format: {path: <path>}"
+    try:
+        content = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return f"{function_name}: file `{path}` not found."
+    return content
 
 
 def load_function(
@@ -103,6 +117,13 @@ def load_function(
         return Tool(
             data["name"],
             partial(save_file, function_name=full_name),
+            description=description_and_input,
+        )
+
+    if file_name == "load_file":
+        return Tool(
+            data["name"],
+            partial(load_file, function_name=full_name),
             description=description_and_input,
         )
 
