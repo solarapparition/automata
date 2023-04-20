@@ -56,10 +56,7 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def load_function(
-    file_name: str,
-    data: dict
-) -> Automaton:
+def load_function(file_name: str, data: dict) -> Automaton:
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
     model = find_model(data["engine"])
@@ -75,9 +72,13 @@ def load_function(
         )
         assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
         input_requirements = "\n".join(
-            [f"- {requirement}" for requirement in data['input_requirements']]
+            [f"- {requirement}" for requirement in data["input_requirements"]]
         )
-        return Tool(data["name"], assistant_chain.run, description=f"{data['description']} Input requirements: \n{input_requirements}")
+        return Tool(
+            data["name"],
+            assistant_chain.run,
+            description=f"{data['description']} Input requirements: \n{input_requirements}",
+        )
 
     if file_name == "null":
         return Tool(
@@ -150,7 +151,14 @@ def add_run_handling(run: Callable, name: str) -> Callable:
             return result
         except Exception as error:
             # ignore all errors since delegators should handle automaton failures
-            return str(error).replace("Could not parse LLM output: ", "The sub-automaton ran into an error while processing the query. Its last thought was: ").replace("`", "```")
+            return (
+                str(error)
+                .replace(
+                    "Could not parse LLM output: ",
+                    "The sub-automaton ran into an error while processing the query. Its last thought was: ",
+                )
+                .replace("`", "```")
+            )
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
             print(postprint)
