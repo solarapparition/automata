@@ -70,7 +70,9 @@ def save_file(action_input: str, function_name: str) -> str:
     return f"{function_name}: saved file to `{path}`"
 
 
-def load_function(file_name: str, data: dict) -> Automaton:
+def load_function(
+    file_name: str, data: dict, caller_name: Union[str, None] = None
+) -> Automaton:
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
     model = find_model(data["engine"])
@@ -210,7 +212,9 @@ class AutomatonAgent(ZeroShotAgent):
 
 
 @lru_cache(maxsize=None)
-def load_automaton(file_name: str, suppress_errors: bool = False) -> Automaton:
+def load_automaton(
+    file_name: str, caller_name: Union[str, None] = None, suppress_errors: bool = False
+) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = yaml.load(
@@ -229,15 +233,15 @@ def load_automaton(file_name: str, suppress_errors: bool = False) -> Automaton:
     )
 
     if data["role"] == "function":  # functions are loaded individually
-        return load_function(file_name, data)
+        return load_function(file_name, data, caller_name)
 
     llm = find_model(engine)
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
     def load_and_run(*args, **kwargs) -> str:
-        sub_automata = data["sub_automata"]
         sub_automata = [
-            load_automaton(name, suppress_errors=True) for name in sub_automata
+            load_automaton(name, caller_name=file_name, suppress_errors=True)
+            for name in data["sub_automata"]
         ]
         prompt = create_automaton_prompt(
             input_requirements=input_requirements,
