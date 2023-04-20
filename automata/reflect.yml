@@ -1,0 +1,10 @@
+name: Reflect
+description: Think about your next steps.
+input_requirements:
+  - ideas for what to think about.
+instructions: null
+imperatives: null
+rank: 0
+engine: null
+role: function
+sub_automata: null

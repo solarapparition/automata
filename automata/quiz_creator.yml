@@ -10,4 +10,4 @@ instructions:
 rank: 1
 engine: gpt-3.5-turbo
 role: worker
-sub_automata: [llm_assistant]
+sub_automata: [llm_assistant, human, reflect, save_file]
