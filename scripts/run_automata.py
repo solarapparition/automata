@@ -158,7 +158,9 @@ def create_automaton_prompt(
     return prompt
 
 
-def add_run_handling(run: Callable, name: str) -> Callable:
+def add_run_handling(
+    run: Callable, name: str, suppress_errors: bool = False
+) -> Callable:
     """Handle errors during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
     postprint = f"\n\n---{name}: End---"
@@ -171,6 +173,8 @@ def add_run_handling(run: Callable, name: str) -> Callable:
             print(postprint)
             return result
         except Exception as error:
+            if not suppress_errors:
+                raise error
             # ignore all errors since delegators should handle automaton failures
             return (
                 str(error)
