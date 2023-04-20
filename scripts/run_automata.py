@@ -225,32 +225,40 @@ def load_automaton(file_name: str, suppress_errors: bool = False) -> Automaton:
         return load_function(file_name, data)
 
     llm = find_model(engine)
-    sub_automata = data["sub_automata"]
-    sub_automata = [load_automaton(name) for name in sub_automata]
-    prompt = create_automaton_prompt(
-        input_requirements=input_requirements,
-        self_instructions=data["instructions"],
-        self_imperatives=data["imperatives"],
-        role_info=get_role_info(data["role"]),
-        sub_automata=sub_automata,
-    )
-    # print(prompt.format(input="blah", agent_scratchpad={}))
-    # breakpoint()
-    llm_chain = LLMChain(llm=llm, prompt=prompt)
-    agent = ZeroShotAgent(
-        llm_chain=llm_chain,
-        allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
-    )
-    agent_executor = AgentExecutor.from_agent_and_tools(
-        agent=agent,
-        tools=sub_automata,
-        verbose=True,
-        max_iterations=data["rank"] * 10 + 5,
-        max_execution_time=data["rank"] * 200 + 60,
-    )
+
+    # wrap rest of loader inside a function to delay loading of sub-automata until needed
+    def load_and_run(*args, **kwargs) -> str:
+        sub_automata = data["sub_automata"]
+        sub_automata = [
+            load_automaton(name, suppress_errors=True) for name in sub_automata
+        ]
+        prompt = create_automaton_prompt(
+            input_requirements=input_requirements,
+            self_instructions=data["instructions"],
+            self_imperatives=data["imperatives"],
+            role_info=get_role_info(data["role"]),
+            sub_automata=sub_automata,
+        )
+        # print(prompt.format(input="blah", agent_scratchpad={}))
+        # breakpoint()
+        llm_chain = LLMChain(llm=llm, prompt=prompt)
+        agent_executor = AgentExecutor.from_agent_and_tools(
+            # agent = ZeroShotAgent(
+            agent=AutomatonAgent(
+                llm_chain=llm_chain,
+                allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
+            ),
+            tools=sub_automata,
+            verbose=True,
+            max_iterations=data["rank"] * 10 + 5,
+            max_execution_time=data["rank"] * 200 + 60,
+        )
+        return agent_executor.run(*args, **kwargs)
+
     automaton = Tool(
         full_name,
-        add_run_handling(agent_executor.run, name=full_name),
+        # add_run_handling(agent_executor.run, name=full_name, suppress_errors=suppress_errors),
+        add_run_handling(load_and_run, name=full_name, suppress_errors=suppress_errors),
         description_and_input,
     )
     return automaton
