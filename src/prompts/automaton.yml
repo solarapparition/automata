@@ -22,4 +22,4 @@ suffix: |
   Begin!
 
   Question: {input}
-  Thought: {agent_scratchpad}
+  Thought:{agent_scratchpad}

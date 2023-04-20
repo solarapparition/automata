@@ -8,14 +8,14 @@ output_format: |
   Your output must have the following format:
   ```
   Question: the task that you've been given
-  Requirement: whether the input adheres to your input requirements
-  Analysis: list out known facts about the task, as well as any contextual information you have learned so far
-  Plan: list out the subtasks or questions required to complete the task, as well which sub-automaton to delegate them to (which could be null, if none is suited for a particular task/question. Assign an item to the "Null" sub-automaton if no sub-automataon is suitable
+  Thought: list out known facts about the task, as well as any contextual information you have learned so far
+  Plan: list out the subtasks or questions required to complete the task, as well which sub-automaton to delegate them to (which could be null, if none is suited for a particular task/question.
   Reflection: think of any particular concerns of the plan, and make adjustments to the plan to address them
   Action: the full name (including parentheses) of one sub-automaton to delegate the most important task or question to. Should be one of the following: [{tool_names}]
   Action Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. The sub-automaton will not remember any previous queries you have sent it
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
-  ... (this Analysis/Plan/Reflection/Action/Action Input/Observation cycle repeats until the task is complete, or there's an error while trying to achieve the task)
-  Thought: I have made a reasonable attempt to complete the task
+  ... (this Thought/Plan/Reflection/Action/Action Input/Observation cycle repeats until the task is complete, or there's an error while trying to achieve the task)
+
+  Thought: I've concluded that there is nothing more that can be done on the task
   Final Answer: the completion status of the task, as well as supporting information, such as the locations of any artifacts generated
   ```
