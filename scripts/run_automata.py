@@ -1,10 +1,11 @@
 """Run a specific automaton and its sub-automata."""
 
-from functools import lru_cache
+from functools import lru_cache, partial
 import functools
+import json
 from pathlib import Path
 import sys
-from typing import Callable, Dict, List, Protocol, Union
+from typing import Callable, Dict, List, Optional, Protocol, Tuple, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import (
@@ -76,7 +77,11 @@ def load_function(file_name: str, data: dict) -> Automaton:
     supported_functions = ["llm_assistant", "reflect", "human", "save_file"]
 
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
-    input_requirements = "\n".join([f"- {req}" for req in data["input_requirements"]]) if data["input_requirements"] else "None"
+    input_requirements = (
+        "\n".join([f"- {req}" for req in data["input_requirements"]])
+        if data["input_requirements"]
+        else "None"
+    )
     description_and_input = (
         data["description"] + f" Input requirements:\n{input_requirements}"
     )
@@ -103,14 +108,12 @@ def load_function(file_name: str, data: dict) -> Automaton:
         return Tool(
             full_name,
             lambda reflection: f"I haven't done anything yet, and need to carefully consider what to do next. My current reflection is: {reflection}",
-            description=description_and_input
+            description=description_and_input,
         )
 
     if file_name == "human":
         return Tool(
             full_name, load_tools(["human"])[0].run, description=description_and_input
-        )
-    
         )
 
     raise NotImplementedError(
@@ -216,7 +219,11 @@ def load_automaton(file_name: str, suppress_errors: bool = False) -> Automaton:
     )
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
-    input_requirements = "\n".join([f"- {req}" for req in data["input_requirements"]])
+    input_requirements = (
+        "\n".join([f"- {req}" for req in data["input_requirements"]])
+        if data["input_requirements"]
+        else "None"
+    )
     description_and_input = (
         data["description"] + f" Input requirements:\n{input_requirements}"
     )
