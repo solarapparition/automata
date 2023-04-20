@@ -56,11 +56,30 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
+def save_file(action_input: str, function_name: str) -> str:
+    """Save a file to the scratchpad."""
+    try:
+        input_json = json.loads(action_input)
+        path = input_json["path"]
+        content = input_json["content"]
+    except (KeyError, json.JSONDecodeError):
+        return "Could not parse input. Please provide the input in the following format: {path: <path>, content: <content>}"
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_text(str(content), encoding="utf-8")
+    return f"{function_name}: saved file to `{path}`"
+
+
 def load_function(file_name: str, data: dict) -> Automaton:
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
     model = find_model(data["engine"])
-    supported_functions = ["llm_assistant"]
+    supported_functions = ["llm_assistant", "reflect", "human", "save_file"]
+
+    full_name = f"{data['name']} ({data['role']} {data['rank']})"
+    input_requirements = "\n".join([f"- {req}" for req in data["input_requirements"]]) if data["input_requirements"] else "None"
+    description_and_input = (
+        data["description"] + f" Input requirements:\n{input_requirements}"
+    )
 
     if file_name == "llm_assistant":
         template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
@@ -71,25 +90,27 @@ def load_function(file_name: str, data: dict) -> Automaton:
             [system_message_prompt, human_message_prompt]
         )
         assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
-        input_requirements = "\n".join(
-            [f"- {requirement}" for requirement in data["input_requirements"]]
-        )
+        return Tool(full_name, assistant_chain.run, description=description_and_input)
+
+    if file_name == "save_file":
         return Tool(
             data["name"],
-            assistant_chain.run,
-            description=f"{data['description']} Input requirements: \n{input_requirements}",
+            partial(save_file, function_name=full_name),
+            description=description_and_input,
         )
 
-    if file_name == "null":
+    if file_name == "reflect":
         return Tool(
-            data["name"],
-            lambda x: "I carefully reflected upon my current work and the best way to move forward with it.",
-            description=data["description"],
+            full_name,
+            lambda reflection: f"I haven't done anything yet, and need to carefully consider what to do next. My current reflection is: {reflection}",
+            description=description_and_input
         )
 
     if file_name == "human":
         return Tool(
-            data["name"], load_tools(["human"])[0].run, description=data["description"]
+            full_name, load_tools(["human"])[0].run, description=description_and_input
+        )
+    
         )
 
     raise NotImplementedError(
