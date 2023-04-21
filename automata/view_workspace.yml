@@ -1,0 +1,10 @@
+name: View Workspace Files
+description: View files available in your workspace.
+input_requirements:
+  - should always be "Null"
+imperatives: null
+instructions: null
+rank: 0
+engine: null
+role: function
+sub_automata: null

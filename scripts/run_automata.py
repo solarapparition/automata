@@ -57,31 +57,42 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def save_file(action_input: str, function_name: str) -> str:
+def save_file(action_input: str, self_name: str, workspace_name: str) -> str:
     """Save a file."""
     try:
         input_json = json.loads(action_input)
-        path = input_json["path"]
+        file_name = input_json["file_name"]
+        path: Path = Path("workspace") / workspace_name / file_name
         content = input_json["content"]
     except (KeyError, json.JSONDecodeError):
-        return "Could not parse input. Please provide the input in the following format: {path: <path>, content: <content>}"
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    Path(path).write_text(str(content), encoding="utf-8")
-    return f"{function_name}: saved file to `{path}`"
+        return "Could not parse input. Please provide the input in the following format: {file_name: <file_name>, content: <content>}"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(str(content), encoding="utf-8")
+    return f"{self_name}: saved file to `{file_name}`"
 
 
-def load_file(action_input: str, function_name: str) -> str:
+def load_file(action_input: str, self_name: str) -> str:
     """Load a file."""
     try:
         input_json = json.loads(action_input)
-        path = input_json["path"]
+        file_name = input_json["file_name"]
+        path: Path = Path("workspace") / file_name
     except (KeyError, json.JSONDecodeError):
-        return "Could not parse input. Please provide the input in the following format: {path: <path>}"
+        return "Could not parse input. Please provide the input in the following format: {file_name: <file_name>}"
     try:
-        content = Path(path).read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        return f"{function_name}: file `{path}` not found."
+        return f"{self_name}: file `{file_name}` not found. Please view your workspace to see which files are available, and use the full path given."
     return content
+
+
+def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
+    """View files in a workspace."""
+    path: Path = Path("workspace") / workspace_name
+    if not path.exists():
+        raise FileNotFoundError(f"Workspace `{workspace_name}` not found.")
+    files = "\n".join(f"- {file.relative_to('workspace')}" for file in path.iterdir())
+    return f"{self_name}: files in your workspace:\n{files}"
 
 
 def load_function(
@@ -90,7 +101,14 @@ def load_function(
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
     model = find_model(data["engine"])
-    supported_functions = ["llm_assistant", "reflect", "human", "save_file"]
+    supported_functions = [
+        "llm_assistant",
+        "reflect",
+        "human",
+        "save_file",
+        "load_file",
+        "view_workspace",
+    ]
 
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     input_requirements = (
@@ -115,15 +133,24 @@ def load_function(
 
     if file_name == "save_file":
         return Tool(
-            data["name"],
-            partial(save_file, function_name=full_name),
+            full_name,
+            partial(save_file, self_name=full_name, workspace_name=delegator),
             description=description_and_input,
         )
 
     if file_name == "load_file":
         return Tool(
-            data["name"],
-            partial(load_file, function_name=full_name),
+            full_name,
+            partial(load_file, self_name=full_name),
+            description=description_and_input,
+        )
+
+    if file_name == "view_workspace":
+        return Tool(
+            full_name,
+            partial(
+                view_workspace_files, self_name=full_name, workspace_name=delegator
+            ),
             description=description_and_input,
         )
 
@@ -299,7 +326,8 @@ def load_automaton(
 def main():
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
-        "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file."
+        # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `quiz.txt`."
+        "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
     )
 
 
