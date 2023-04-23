@@ -324,6 +324,10 @@ def load_automaton(
 
 
 def main():
+    RESOURCE_METADATA_FILE = "resource_metadata.db"
+    resource_metadata = ResourceMetadata(RESOURCE_METADATA_FILE)
+
+    breakpoint()
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
         # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `quiz.txt`."
