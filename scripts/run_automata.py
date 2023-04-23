@@ -49,7 +49,7 @@ class Automaton(Protocol):
 
 
 def find_model(engine: str) -> BaseLLM:
-    """Find the model to use for a given reasoning type."""
+    """Create the model to use."""
     if engine is None:
         return None
     if engine in ["gpt-3.5-turbo", "gpt-4"]:
@@ -69,7 +69,7 @@ def save_file(action_input: str, self_name: str, workspace_name: str) -> str:
     path: Path = Path("workspace") / workspace_name / file_name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(str(content), encoding="utf-8")
-    resource_metadata.set_description(path, description)
+    resource_metadata.set_description(str(path), description)
     return f"{self_name}: saved file to `{file_name}`"
 
 
@@ -92,7 +92,7 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
     """View files in a workspace."""
     path: Path = Path("workspace") / workspace_name
     file_info = (
-        f"- {file.relative_to('workspace')}: {resource_metadata.get_description(file)}"
+        f"- `{file.relative_to('workspace')}`: {resource_metadata.get_description(str(file))}"
         for file in path.iterdir()
     )
     if not path.exists():
@@ -330,7 +330,6 @@ def load_automaton(
 
 
 def main():
-
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
         # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `quiz.txt`."
