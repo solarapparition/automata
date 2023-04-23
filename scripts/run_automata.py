@@ -34,7 +34,7 @@ import yaml
 
 sys.path.append("")
 
-from src.globals import AUTOMATON_AFFIXES
+from src.globals import AUTOMATON_AFFIXES, resource_metadata
 
 
 class Automaton(Protocol):
@@ -62,12 +62,14 @@ def save_file(action_input: str, self_name: str, workspace_name: str) -> str:
     try:
         input_json = json.loads(action_input)
         file_name = input_json["file_name"]
-        path: Path = Path("workspace") / workspace_name / file_name
         content = input_json["content"]
+        description = input_json.get("description", "")
     except (KeyError, json.JSONDecodeError):
-        return "Could not parse input. Please provide the input in the following format: {file_name: <file_name>, content: <content>}"
+        return "Could not parse input. Please provide the input in the following format: {file_name: <file_name>, description: <description>, content: <content>}"
+    path: Path = Path("workspace") / workspace_name / file_name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(str(content), encoding="utf-8")
+    resource_metadata.set_description(path, description)
     return f"{self_name}: saved file to `{file_name}`"
 
 
@@ -89,9 +91,13 @@ def load_file(action_input: str, self_name: str) -> str:
 def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
     """View files in a workspace."""
     path: Path = Path("workspace") / workspace_name
+    file_info = (
+        f"- {file.relative_to('workspace')}: {resource_metadata.get_description(file)}"
+        for file in path.iterdir()
+    )
     if not path.exists():
         raise FileNotFoundError(f"Workspace `{workspace_name}` not found.")
-    files = "\n".join(f"- {file.relative_to('workspace')}" for file in path.iterdir())
+    files = "\n".join(file_info)
     return f"{self_name}: files in your workspace:\n{files}"
 
 
@@ -324,10 +330,7 @@ def load_automaton(
 
 
 def main():
-    RESOURCE_METADATA_FILE = "resource_metadata.db"
-    resource_metadata = ResourceMetadata(RESOURCE_METADATA_FILE)
 
-    breakpoint()
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
         # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `quiz.txt`."

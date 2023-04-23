@@ -5,6 +5,7 @@ from typing import Dict
 
 import yaml
 
+from src.resource_metadata import ResourceMetadata
 
 AUTOMATON_AFFIXES: Dict[str, str] = {
     key: val.strip()
@@ -13,3 +14,5 @@ AUTOMATON_AFFIXES: Dict[str, str] = {
         Loader=yaml.FullLoader,
     ).items()
 }
+
+resource_metadata = ResourceMetadata("resource_metadata.db")
