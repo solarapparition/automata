@@ -70,7 +70,7 @@ def save_file(action_input: str, self_name: str, workspace_name: str) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(str(content), encoding="utf-8")
     resource_metadata.set_description(str(path), description)
-    return f"{self_name}: saved file to `{file_name}`"
+    return f"{self_name}: saved file to `{path.relative_to('workspace')}`"
 
 
 def load_file(action_input: str, self_name: str) -> str:
