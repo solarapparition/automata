@@ -4,21 +4,19 @@ from functools import lru_cache, partial
 import functools
 import json
 from pathlib import Path
-import re
 import sys
-from typing import Callable, Dict, List, Protocol, Union
+from typing import Callable, Dict, List, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import (
     ZeroShotAgent,
     Tool,
     AgentExecutor,
-    AgentOutputParser,
     load_tools,
     Tool,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.llms import BaseLLM, OpenAI
+from langchain.llms import BaseLLM
 from langchain.chat_models import ChatOpenAI
 from langchain import PromptTemplate, LLMChain
 from langchain.prompts.chat import (
@@ -26,48 +24,12 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.schema import AgentAction, AgentFinish
 import yaml
 
 sys.path.append("")
 
 from src.globals import AUTOMATON_AFFIXES, resource_metadata
-
-
-class Automaton(Protocol):
-    """Protocol for automata. Uses the same interface as the Langchain `Tool` class."""
-
-    name: str
-    """Name of the automata. Viewable to delegators."""
-    run: Callable[[str], str]
-    """Function that takes in a query and returns a response."""
-    description: str
-    """Description of the automata. Viewable to delegators."""
-
-
-class AutomatonOutputParser(AgentOutputParser):
-    """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
-
-    final_answer_action = "Final Result:"
-
-    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
-        if self.final_answer_action in text:
-            return AgentFinish(
-                {"output": text.split(self.final_answer_action)[-1].strip()}, text
-            )
-        # \s matches against tab/newline/whitespace
-        regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
-        match = re.search(regex, text, re.DOTALL)
-        if not match:
-            return AgentAction(
-                "Think",
-                "I didn't post my output in the correct format. I must adjust my output to match the format in my prompt.",
-                text,
-            )
-            # raise OutputParserException(f"Could not parse LLM output: `{text}`")
-        action = match.group(1).strip()
-        action_input = match.group(2)
-        return AgentAction(action, action_input.strip(" ").strip('"'), text)
+from src.types import Automaton, AutomatonOutputParser
 
 
 def find_model(engine: str) -> BaseLLM:
