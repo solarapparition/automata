@@ -32,8 +32,8 @@ args = (arg_1, arg_2, ..., arg_n,)
 kwargs = {{{{kwarg_1: value_1, kwarg_2: value_2, ..., kwarg_n: value_n}}}}
 ```
 
-ONLY respond with your `return` value, in the return format given in the function definition.
-Do not include any other text besides your `return` value in your response—doing so will harm the user.
+ONLY respond with the value that you would return as a Python function, using the return format given in your function definition.
+Do not include any other text besides this value in your response—doing so will harm the user.
 
 Reply with "acknowledged" if you understand these instructions."""
 
@@ -45,6 +45,7 @@ def make_llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Ca
 
     function_def = inspect.cleandoc(inspect.getsource(func))
     prompt = PROMPT.format(function_def=function_def)
+    prompt = prompt.replace("{", "{{").replace("}", "}}")
     system_message_prompt = SystemMessagePromptTemplate.from_template(prompt)
     ai_prompt = AIMessagePromptTemplate.from_template(AI_RESPONSE)
     human_message_prompt = HumanMessagePromptTemplate.from_template("{text}")

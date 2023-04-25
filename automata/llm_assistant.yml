@@ -7,5 +7,6 @@ imperatives: null
 instructions: null
 rank: 0
 engine: gpt-3.5-turbo
+input_validator_engine: gpt-4 # high intelligence to ensure that the input is valid
 role: function
 sub_automata: null

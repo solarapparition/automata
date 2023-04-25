@@ -29,6 +29,7 @@ import yaml
 sys.path.append("")
 
 from src.globals import AUTOMATON_AFFIXES, resource_metadata
+from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
 
 
@@ -86,7 +87,11 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
 
 
 def load_function(
-    file_name: str, data: dict, delegator: Union[str, None] = None
+    file_name: str,
+    data: dict,
+    delegator: Union[str, None] = None,
+    input_validator: Callable[[str], Tuple[bool, str]] = None,
+    suppress_errors: bool = False,
 ) -> Automaton:
     """Load a function, which uses the same interface as automata but does not make decisions."""
 
@@ -119,46 +124,40 @@ def load_function(
             [system_message_prompt, human_message_prompt]
         )
         assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
-        return Tool(full_name, assistant_chain.run, description=description_and_input)
+        run = assistant_chain.run
 
-    if file_name == "save_file":
-        return Tool(
-            full_name,
-            partial(save_file, self_name=full_name, workspace_name=delegator),
-            description=description_and_input,
+    elif file_name == "save_file":
+        run = partial(save_file, self_name=full_name, workspace_name=delegator)
+
+    elif file_name == "load_file":
+        run = partial(load_file, self_name=full_name)
+
+    elif file_name == "view_workspace":
+        run = partial(
+            view_workspace_files, self_name=full_name, workspace_name=delegator
         )
 
-    if file_name == "load_file":
-        return Tool(
-            full_name,
-            partial(load_file, self_name=full_name),
-            description=description_and_input,
-        )
-
-    if file_name == "view_workspace":
-        return Tool(
-            full_name,
-            partial(
-                view_workspace_files, self_name=full_name, workspace_name=delegator
-            ),
-            description=description_and_input,
-        )
-
-    if file_name == "think":
-        return Tool(
-            full_name,
+    elif file_name == "think":
+        run = (
             lambda thought: f"I haven't done anything yet, and need to carefully consider what to do next. My previous thought was: {thought}",
-            description=description_and_input,
         )
 
-    if file_name == "human":
-        return Tool(
-            full_name, load_tools(["human"])[0].run, description=description_and_input
+    elif file_name == "human":
+        run = load_tools(["human"])[0].run
+
+    else:
+        raise NotImplementedError(
+            f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
         )
 
-    raise NotImplementedError(
-        f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
+    run = add_run_handling(
+        run,
+        name=full_name,
+        suppress_errors=suppress_errors,
+        input_validator=input_validator,
     )
+
+    return Tool(full_name, run, description_and_input)
 
 
 def get_role_info(role: str) -> Dict:
@@ -206,8 +205,8 @@ def inspect_input_specs(input: str, requirements: List[str]) -> Dict[str, str]:
     Validate whether the input for a function adheres to the requirements of the function.
 
     This function checks the given input string against a list of requirements and returns a dictionary. The dictionary
-    contains two keys: 'success' and 'message'. The 'success' key has a boolean value indicating whether the input
-    meets all the requirements, and the 'message' key has a string value with an error message if the input does not
+    contains two keys: "success" and "message". The "success" key has a boolean value indicating whether the input
+    meets all the requirements, and the "message" key has a string value with an error message if the input does not
     meet a requirement, or an empty string if the input meets all the requirements.
 
     :param input: The input string to be validated.
@@ -219,33 +218,36 @@ def inspect_input_specs(input: str, requirements: List[str]) -> Dict[str, str]:
 
     Examples:
     >>> inspect_input("1 + 1", ["A math expression"])
-    {'success': True, 'message': ''}
+    {"success": true, "message": ""}
     >>> inspect_input("x = 5", ["A math expression", "Contains a variable", "Variable is named 'y'"])
-    {'success': False, 'message': "The input does not have a variable named 'y'."}
+    {"success": false, "message": "The input does not have a variable named 'y'."}
     >>> inspect_input("def example_function():", ["A function definition", "Named 'example_function'"])
-    {'success': True, 'message': ''}
+    {"success": true, "message": ""}
     >>> inspect_input("x + y * z", ["A math expression", "Uses all basic arithmetic operations"])
-    {'success': False, 'message': 'The input does not use all basic arithmetic operations.'}
+    {"success": false, "message": "The input does not use all basic arithmetic operations."}
     >>> inspect_input("How are you?", ["A question", "About well-being"])
-    {'success': True, 'message': ''}
+    {"success": true, "message": ""}
     >>> inspect_input("The quick brown fox jumps over the lazy dog.", ["A sentence", "Contains all English letters"])
-    {'success': True, 'message': ''}
+    {"success": true, "message": ""}
     >>> inspect_input("Once upon a time...", ["A narrative", "Begins with a common opening phrase"])
-    {'success': True, 'message': ''}
+    {"success": true, "message": ""}
     >>> inspect_input("How old are you?", ["A question", "About age", "Uses the word 'years'"])
-    {'success': False, 'message': "The input does not use the word 'years'."}
+    {"success": false, "message": "The input does not use the word 'years'."}
     >>> inspect_input("The sun sets in the east.", ["A statement", "Describes a natural phenomenon", "Factually accurate"])
-    {'success': False, 'message': 'The input is not factually accurate.'}
+    {"success": false, "message": "The input is not factually accurate."}
     >>> inspect_input("Are you going to the party tonight?", ["A question", "About attending an event", "Mentions a specific person"])
-    {'success': False, 'message': 'The input does not mention a specific person.'}
+    {"success": false, "message": "The input does not mention a specific person."}
     >>> inspect_input("I prefer dogs over cats.", ["A preference", "Involves animals", "Prefers cats"])
-    {'success': False, 'message': 'The input expresses a preference for dogs, not cats.'}
+    {"success": false, "message": "The input expresses a preference for dogs, not cats."}
     """
     ...
 
 
 def add_run_handling(
-    run: Callable, name: str, input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None, suppress_errors: bool = False
+    run: Callable,
+    name: str,
+    input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None,
+    suppress_errors: bool = False,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
@@ -255,7 +257,6 @@ def add_run_handling(
     def wrapper(*args, **kwargs):
         if input_validator:
             valid, error = input_validator(args[0])
-            breakpoint()
             if not valid:
                 return error
         print(preprint)
@@ -263,18 +264,18 @@ def add_run_handling(
             result = run(*args, **kwargs)
             print(postprint)
             return result
-        except Exception as error:
-            if not suppress_errors:
-                raise error
-            # ignore all errors since delegators should handle automaton failures
-            return (
-                str(error)
-                .replace(
-                    "Could not parse LLM output: ",
-                    "The sub-automaton ran into an error while processing the query. Its last thought was: ",
-                )
-                .replace("`", "```")
-            )
+        # except Exception as error:
+        #     if not suppress_errors:
+        #         raise error
+        #     # ignore all errors since delegators should handle automaton failures
+        #     return (
+        #         str(error)
+        #         .replace(
+        #             "Could not parse LLM output: ",
+        #             "The sub-automaton ran into an error while processing the query. Its last thought was: ",
+        #         )
+        #         .replace("`", "```")
+        #     )
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
             print(postprint)
@@ -304,8 +305,52 @@ def load_automaton(
         data["description"] + f" Input requirements:\n{input_requirements}"
     )
 
-    if data["role"] == "function":  # functions are loaded individually
-        return load_function(file_name, data, delegator)
+    # create input validation
+    validator_engine = data["input_validator_engine"]
+    if validator_engine:
+        inspect_input = make_llm_function(
+            inspect_input_specs, model=find_model(validator_engine)
+        )
+        inspect_input = partial(
+            inspect_input, input_requirements=data["input_requirements"]
+        )
+
+        print(file_name)
+
+    def validate_input(
+        run_input: str, input_inspector: Callable[[str], str]
+    ) -> Tuple[bool, str]:
+        """Validate input against input requirements, using an input inspector. The input inspector is intended to be powered by an LLM."""
+        expected_output_keys = ["success", "message"]
+        output = input_inspector(run_input)
+        try:
+            output = json.loads(output)
+        except json.JSONDecodeError:
+            raise ValueError("Input inspector output is not valid JSON.")
+        try:
+            if output["success"]:
+                return True, ""
+            return (
+                output["success"],
+                f"Error: {output['message']} Please check the input requirements of this automaton (`{full_name}`) and try again.",
+            )
+        except KeyError as error:
+            raise ValueError(
+                f"Input inspector output does not have the correct format. Expected keys: {expected_output_keys}"
+            ) from error
+
+    input_validator = partial(validate_input, input_inspector=inspect_input)
+
+    if (
+        data["role"] == "function"
+    ):  # functions are loaded separately from higher-order automata
+        return load_function(
+            file_name,
+            data,
+            delegator,
+            input_validator=input_validator,
+            suppress_errors=True,
+        )
 
     llm = find_model(engine)
 
@@ -338,29 +383,14 @@ def load_automaton(
         )
         return agent_executor.run(*args, **kwargs)
 
-    from src.llm_function import make_llm_function
-
-    breakpoint()
-    # > add in `input_validator_engine` to automaton definition
-    validator_engine = data["input_validator_engine"]
-    validator_llm = find_model(validator_engine)
-    inspect_input = make_llm_function(inspect_input_specs, model=validator_llm)
-
-    def validate_input(input: str) -> Tuple[bool, str]:
-
-        # > need to parse output of inspect_input into a boolean and a message
-        breakpoint()
-        inspect_input(input, data["input_requirements"])
-
-    validate_input("blah")
-
-
-    # > validator must also return requirements
-    # > add validator engine to automaton definition
-
     automaton = Tool(
         full_name,
-        add_run_handling(load_and_run, name=full_name, suppress_errors=suppress_errors),
+        add_run_handling(
+            load_and_run,
+            name=full_name,
+            suppress_errors=suppress_errors,
+            input_validator=input_validator,
+        ),
         description_and_input,
     )
     return automaton
@@ -369,9 +399,15 @@ def load_automaton(
 def main():
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
-        # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `quiz.txt`."
+        # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`."
         "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
     )
+
+    # assistant = load_automaton("llm_assistant")
+    # result = assistant.run(
+    #     "generate a math quiz and save it to a file called `math_quiz.txt`."
+    # )
+    breakpoint()
 
 
 if __name__ == "__main__":
