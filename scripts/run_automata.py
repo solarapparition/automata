@@ -5,7 +5,7 @@ import functools
 import json
 from pathlib import Path
 import sys
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import (
@@ -201,8 +201,51 @@ def create_automaton_prompt(
     return prompt
 
 
+def inspect_input_specs(input: str, requirements: List[str]) -> Dict[str, str]:
+    """
+    Validate whether the input for a function adheres to the requirements of the function.
+
+    This function checks the given input string against a list of requirements and returns a dictionary. The dictionary
+    contains two keys: 'success' and 'message'. The 'success' key has a boolean value indicating whether the input
+    meets all the requirements, and the 'message' key has a string value with an error message if the input does not
+    meet a requirement, or an empty string if the input meets all the requirements.
+
+    :param input: The input string to be validated.
+    :type input: str
+    :param requirements: A list of requirements that the input string should meet.
+    :type requirements: List[str]
+    :return: A dictionary containing a boolean value indicating whether the input meets all requirements and an error message.
+    :rtype: Dict[str, str]
+
+    Examples:
+    >>> inspect_input("1 + 1", ["A math expression"])
+    {'success': True, 'message': ''}
+    >>> inspect_input("x = 5", ["A math expression", "Contains a variable", "Variable is named 'y'"])
+    {'success': False, 'message': "The input does not have a variable named 'y'."}
+    >>> inspect_input("def example_function():", ["A function definition", "Named 'example_function'"])
+    {'success': True, 'message': ''}
+    >>> inspect_input("x + y * z", ["A math expression", "Uses all basic arithmetic operations"])
+    {'success': False, 'message': 'The input does not use all basic arithmetic operations.'}
+    >>> inspect_input("How are you?", ["A question", "About well-being"])
+    {'success': True, 'message': ''}
+    >>> inspect_input("The quick brown fox jumps over the lazy dog.", ["A sentence", "Contains all English letters"])
+    {'success': True, 'message': ''}
+    >>> inspect_input("Once upon a time...", ["A narrative", "Begins with a common opening phrase"])
+    {'success': True, 'message': ''}
+    >>> inspect_input("How old are you?", ["A question", "About age", "Uses the word 'years'"])
+    {'success': False, 'message': "The input does not use the word 'years'."}
+    >>> inspect_input("The sun sets in the east.", ["A statement", "Describes a natural phenomenon", "Factually accurate"])
+    {'success': False, 'message': 'The input is not factually accurate.'}
+    >>> inspect_input("Are you going to the party tonight?", ["A question", "About attending an event", "Mentions a specific person"])
+    {'success': False, 'message': 'The input does not mention a specific person.'}
+    >>> inspect_input("I prefer dogs over cats.", ["A preference", "Involves animals", "Prefers cats"])
+    {'success': False, 'message': 'The input expresses a preference for dogs, not cats.'}
+    """
+    ...
+
+
 def add_run_handling(
-    run: Callable, name: str, suppress_errors: bool = False
+    run: Callable, name: str, input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None, suppress_errors: bool = False
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
@@ -210,6 +253,11 @@ def add_run_handling(
 
     @functools.wraps(run)
     def wrapper(*args, **kwargs):
+        if input_validator:
+            valid, error = input_validator(args[0])
+            breakpoint()
+            if not valid:
+                return error
         print(preprint)
         try:
             result = run(*args, **kwargs)
@@ -289,6 +337,26 @@ def load_automaton(
             max_execution_time=data["rank"] * 200 + 60,
         )
         return agent_executor.run(*args, **kwargs)
+
+    from src.llm_function import make_llm_function
+
+    breakpoint()
+    # > add in `input_validator_engine` to automaton definition
+    validator_engine = data["input_validator_engine"]
+    validator_llm = find_model(validator_engine)
+    inspect_input = make_llm_function(inspect_input_specs, model=validator_llm)
+
+    def validate_input(input: str) -> Tuple[bool, str]:
+
+        # > need to parse output of inspect_input into a boolean and a message
+        breakpoint()
+        inspect_input(input, data["input_requirements"])
+
+    validate_input("blah")
+
+
+    # > validator must also return requirements
+    # > add validator engine to automaton definition
 
     automaton = Tool(
         full_name,

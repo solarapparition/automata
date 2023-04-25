@@ -40,7 +40,7 @@ Reply with "acknowledged" if you understand these instructions."""
 AI_RESPONSE = "Acknowledged."
 
 
-def _llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Callable]:
+def make_llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Callable]:
     """Convert a function definition into an AI function."""
 
     function_def = inspect.cleandoc(inspect.getsource(func))
@@ -64,7 +64,7 @@ def _llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Callab
 
 def llm_function(model: BaseLLM) -> Callable[[Callable], Callable]:
     """Convert a function definition into an AI function."""
-    return partial(_llm_function, model=model)
+    return partial(make_llm_function, model=model)
 
 
 def demo() -> None:
