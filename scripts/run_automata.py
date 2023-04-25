@@ -4,6 +4,7 @@ from functools import lru_cache, partial
 import functools
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Callable, Dict, List, Optional, Protocol, Tuple, Union
 
@@ -12,6 +13,7 @@ from langchain.agents import (
     ZeroShotAgent,
     Tool,
     AgentExecutor,
+    AgentOutputParser,
     load_tools,
     initialize_agent,
     Tool,
@@ -29,7 +31,7 @@ from langchain.prompts.chat import (
     AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.schema import AgentAction, AgentFinish
 import yaml
 
 sys.path.append("")
@@ -46,6 +48,31 @@ class Automaton(Protocol):
     """Function that takes in a query and returns a response."""
     description: str
     """Description of the automata. Viewable to delegators."""
+
+
+class AutomatonOutputParser(AgentOutputParser):
+    """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
+
+    final_answer_action = "Final Result:"
+
+    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+        if self.final_answer_action in text:
+            return AgentFinish(
+                {"output": text.split(self.final_answer_action)[-1].strip()}, text
+            )
+        # \s matches against tab/newline/whitespace
+        regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        match = re.search(regex, text, re.DOTALL)
+        if not match:
+            return AgentAction(
+                "Think",
+                "I didn't post my output in the correct format. I must adjust my output to match the format in my prompt.",
+                text,
+            )
+            # raise OutputParserException(f"Could not parse LLM output: `{text}`")
+        action = match.group(1).strip()
+        action_input = match.group(2)
+        return AgentAction(action, action_input.strip(" ").strip('"'), text)
 
 
 def find_model(engine: str) -> BaseLLM:
@@ -251,20 +278,6 @@ def add_run_handling(
     return wrapper
 
 
-class AutomatonAgent(ZeroShotAgent):
-    def _extract_tool_and_input(self, text: str) -> Optional[Tuple[str, str]]:
-        """Extract the tool and input from the text, with handling for when automata do not specify the correct action and input."""
-        try:
-            # from langchain.agents.mrkl.base import get_action_and_input
-            # return get_action_and_input(text)
-            return super()._extract_tool_and_input(text)
-        except ValueError:
-            return (
-                "Reflect",
-                "I didn't post my output in the correct format. I need to adjust my output.",
-            )
-
-
 @lru_cache(maxsize=None)
 def load_automaton(
     file_name: str, delegator: Union[str, None] = None, suppress_errors: bool = False
@@ -308,10 +321,10 @@ def load_automaton(
         # breakpoint()
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         agent_executor = AgentExecutor.from_agent_and_tools(
-            # agent = ZeroShotAgent(
-            agent=AutomatonAgent(
+            agent=ZeroShotAgent(
                 llm_chain=llm_chain,
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
+                output_parser=AutomatonOutputParser(),
             ),
             tools=sub_automata,
             verbose=True,
