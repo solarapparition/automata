@@ -109,7 +109,7 @@ def load_function(
     model = find_model(data["engine"])
     supported_functions = [
         "llm_assistant",
-        "reflect",
+        "think",
         "human",
         "save_file",
         "load_file",
@@ -160,10 +160,10 @@ def load_function(
             description=description_and_input,
         )
 
-    if file_name == "reflect":
+    if file_name == "think":
         return Tool(
             full_name,
-            lambda reflection: f"I haven't done anything yet, and need to carefully consider what to do next. My current reflection is: {reflection}",
+            lambda thought: f"I haven't done anything yet, and need to carefully consider what to do next. My previous thought was: {thought}",
             description=description_and_input,
         )
 

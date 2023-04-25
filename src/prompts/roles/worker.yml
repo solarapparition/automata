@@ -10,9 +10,7 @@ output_format: |
   Objective: the task that you've been given
   Thought: list out known facts about the task, as well as any contextual information you have learned so far
   Plan: list out the subtasks or questions required to complete the task, as well which sub-automaton to delegate them to (if appropriate)
-  Reflection: think of any particular concerns of the plan, and make adjustments to the plan to address them
-  Action: the full name (including parentheses) of one sub-automaton to delegate the most important task or question to. Should be one of the following: [{tool_names}]
-  Action Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. The sub-automaton will not remember any previous queries you have sent it
+  Critism: think of any particular concerns of the plan, and make adjustments to the plan to address them
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
   ... (this `Thought/Plan/Reflection/Action/Action Input/Observation` cycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
 
