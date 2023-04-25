@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from typing import Callable, Dict, List, Optional, Protocol, Tuple, Union
+from typing import Callable, Dict, List, Protocol, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import (
@@ -15,20 +15,15 @@ from langchain.agents import (
     AgentExecutor,
     AgentOutputParser,
     load_tools,
-    initialize_agent,
     Tool,
-    AgentType,
 )
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import BaseLLM, OpenAI
-from langchain.tools import BaseTool
-from langchain.prompts.chat import ChatPromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain import PromptTemplate, LLMChain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
 from langchain.schema import AgentAction, AgentFinish
@@ -247,7 +242,7 @@ def create_automaton_prompt(
 def add_run_handling(
     run: Callable, name: str, suppress_errors: bool = False
 ) -> Callable:
-    """Handle errors during execution of a query."""
+    """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
     postprint = f"\n\n---{name}: End---"
 
@@ -335,7 +330,6 @@ def load_automaton(
 
     automaton = Tool(
         full_name,
-        # add_run_handling(agent_executor.run, name=full_name, suppress_errors=suppress_errors),
         add_run_handling(load_and_run, name=full_name, suppress_errors=suppress_errors),
         description_and_input,
     )
