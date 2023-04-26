@@ -378,8 +378,8 @@ def load_automaton(
             ),
             tools=sub_automata,
             verbose=True,
-            max_iterations=data["rank"] * 10 + 5,
-            max_execution_time=data["rank"] * 200 + 60,
+            max_iterations=None,
+            max_execution_time=None,
         )
         return agent_executor.run(*args, **kwargs)
 
