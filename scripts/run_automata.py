@@ -1,5 +1,6 @@
 """Run a specific automaton and its sub-automata."""
 
+import ast
 from functools import lru_cache, partial
 import functools
 import json
@@ -323,10 +324,17 @@ def load_automaton(
         """Validate input against input requirements, using an input inspector. The input inspector is intended to be powered by an LLM."""
         expected_output_keys = ["success", "message"]
         output = input_inspector(run_input)
+
         try:
             output = json.loads(output)
         except json.JSONDecodeError:
-            raise ValueError("Input inspector output is not valid JSON.")
+            output = ast.literal_eval(
+                output.replace("true", "True").replace("false", "False")
+            )
+        except Exception as error:
+            raise ValueError(
+                "Input inspector output is not a valid dictionary."
+            ) from error
         try:
             if output["success"]:
                 return True, ""
