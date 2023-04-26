@@ -117,7 +117,7 @@ def load_function(
     )
 
     if file_name == "llm_assistant":
-        template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible."
+        template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible, and provide no further information."
         system_message_prompt = SystemMessagePromptTemplate.from_template(template)
         human_template = "{text}"
         human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
@@ -258,9 +258,7 @@ def validate_input(
             output.replace("true", "True").replace("false", "False")
         )
     except Exception as error:
-        raise ValueError(
-            "Input inspector output is not a valid dictionary."
-        ) from error
+        raise ValueError("Input inspector output is not a valid dictionary.") from error
     try:
         if output["success"]:
             return True, ""
