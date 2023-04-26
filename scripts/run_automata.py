@@ -347,7 +347,11 @@ def load_automaton(
                 f"Input inspector output does not have the correct format. Expected keys: {expected_output_keys}"
             ) from error
 
-    input_validator = partial(validate_input, input_inspector=inspect_input)
+    input_validator = (
+        partial(validate_input, input_inspector=inspect_input)
+        if validator_engine
+        else None
+    )
 
     if (
         data["role"] == "function"
