@@ -319,7 +319,7 @@ def load_automaton(
         print(file_name)
 
     def validate_input(
-        run_input: str, input_inspector: Callable[[str], str]
+        run_input: str, input_inspector: Callable[[str], str], full_name: str
     ) -> Tuple[bool, str]:
         """Validate input against input requirements, using an input inspector. The input inspector is intended to be powered by an LLM."""
         expected_output_keys = ["success", "message"]
@@ -340,7 +340,7 @@ def load_automaton(
                 return True, ""
             return (
                 output["success"],
-                f"Error: {output['message']} Please check the input requirements of this automaton (`{full_name}`) and try again.",
+                f"{full_name}: {output['message']} Please check the input requirements of this automaton and try again.",
             )
         except KeyError as error:
             raise ValueError(
