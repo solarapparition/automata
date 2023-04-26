@@ -104,6 +104,7 @@ def load_function(
         "save_file",
         "load_file",
         "view_workspace",
+        "finalize",
     ]
 
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
@@ -145,6 +146,9 @@ def load_function(
 
     elif file_name == "human":
         run = load_tools(["human"])[0].run
+
+    elif file_name == "finalize":
+        run = lambda _: None # not meant to actually be run; the finalize action should be caught by the parser first
 
     else:
         raise NotImplementedError(

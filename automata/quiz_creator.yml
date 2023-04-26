@@ -11,4 +11,4 @@ rank: 1
 engine: gpt-3.5-turbo
 input_validator_engine: null
 role: worker
-sub_automata: [llm_assistant, human, think, save_file, view_workspace, load_file]
+sub_automata: [llm_assistant, human, think, save_file, view_workspace, load_file, finalize]

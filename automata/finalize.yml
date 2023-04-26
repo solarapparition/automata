@@ -1,0 +1,14 @@
+name: Finalize Result
+description: Report back on the result of your work.
+input_requirements:
+  - includes the final completion status of the task or question
+  - includes the final result of the task or question
+  - includes the complete path to the location(s) of any artifacts generated
+  - "result is in the following format: {{\"completion_status\": <completion_status>, \"result/answer\": <result/answer>, \"generated_artifacts\": [<artifact_location_1>, <artifact_location_2>, ...]]}}"
+imperatives: null
+instructions: null
+rank: 0
+engine: null
+input_validator_engine: null
+role: function
+sub_automata: null

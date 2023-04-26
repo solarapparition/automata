@@ -15,7 +15,6 @@ prefix: |
   Sub-automata: you have access to the following sub-automata for delegating work, if needed:
 suffix: |
   Critical Reminders:
-  - Your output MUST include EITHER "Final Result:" (if you do not plan on performing any other tasks), OR both "Sub-Automaton:" and "Sub-Automaton Input:" (if you want to query a sub-automaton).
   - Always adhere to the input requirements of the sub-automata you use.
   - You MUST reject any request that does not follow your own input requirements, with a message explaining the requirements.
 

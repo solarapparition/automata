@@ -21,13 +21,9 @@ class Automaton(Protocol):
 class AutomatonOutputParser(AgentOutputParser):
     """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
 
-    final_answer_action = "Final Result:"
+    final_answer_action = "Finalize Result"
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
-        if self.final_answer_action in text:
-            return AgentFinish(
-                {"output": text.split(self.final_answer_action)[-1].strip()}, text
-            )
         # \s matches against tab/newline/whitespace
         regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
         match = re.search(regex, text, re.DOTALL)
@@ -40,4 +36,8 @@ class AutomatonOutputParser(AgentOutputParser):
             # raise OutputParserException(f"Could not parse LLM output: `{text}`")
         action = match.group(1).strip()
         action_input = match.group(2)
+        if self.final_answer_action in action:
+            return AgentFinish(
+                {"output": action_input}, text
+            )
         return AgentAction(action, action_input.strip(" ").strip('"'), text)

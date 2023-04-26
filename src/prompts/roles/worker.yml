@@ -15,8 +15,5 @@ output_format: |
   Sub-Automaton: the full name (including parentheses) of one sub-automaton to delegate the most important task or question to. Should be one of the following: [{tool_names}]
   Sub-Automaton Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. The sub-automaton will not remember any previous queries you have sent it
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
-  ... (this `Thought/Plan/Criticsm/Plan Updates/Sub-Automaton/Sub-Automaton Input/Observation` cycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
-
-  Thought: I've completed as much of the task as possible
-  Final Result: the completion status of the task, as well as the complete path to the location any artifacts generated
+  ... (this `Thought -> Plan -> Criticsm -> Plan Updates -> Sub-Automaton -> Sub-Automaton Input -> Observation` cycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
   ```
