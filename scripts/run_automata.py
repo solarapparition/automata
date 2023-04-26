@@ -244,6 +244,36 @@ def inspect_input_specs(input: str, requirements: List[str]) -> Dict[str, str]:
     ...
 
 
+def validate_input(
+    run_input: str, input_inspector: Callable[[str], str], full_name: str
+) -> Tuple[bool, str]:
+    """Validate input against input requirements, using an input inspector. The input inspector is intended to be powered by an LLM."""
+    expected_output_keys = ["success", "message"]
+    output = input_inspector(run_input)
+
+    try:
+        output = json.loads(output)
+    except json.JSONDecodeError:
+        output = ast.literal_eval(
+            output.replace("true", "True").replace("false", "False")
+        )
+    except Exception as error:
+        raise ValueError(
+            "Input inspector output is not a valid dictionary."
+        ) from error
+    try:
+        if output["success"]:
+            return True, ""
+        return (
+            output["success"],
+            f"{full_name}: {output['message']} Please check the input requirements of this automaton and try again.",
+        )
+    except KeyError as error:
+        raise ValueError(
+            f"Input inspector output does not have the correct format. Expected keys: {expected_output_keys}"
+        ) from error
+
+
 def add_run_handling(
     run: Callable,
     name: str,
@@ -316,39 +346,8 @@ def load_automaton(
             inspect_input, input_requirements=data["input_requirements"]
         )
 
-        print(file_name)
-
-    def validate_input(
-        run_input: str, input_inspector: Callable[[str], str], full_name: str
-    ) -> Tuple[bool, str]:
-        """Validate input against input requirements, using an input inspector. The input inspector is intended to be powered by an LLM."""
-        expected_output_keys = ["success", "message"]
-        output = input_inspector(run_input)
-
-        try:
-            output = json.loads(output)
-        except json.JSONDecodeError:
-            output = ast.literal_eval(
-                output.replace("true", "True").replace("false", "False")
-            )
-        except Exception as error:
-            raise ValueError(
-                "Input inspector output is not a valid dictionary."
-            ) from error
-        try:
-            if output["success"]:
-                return True, ""
-            return (
-                output["success"],
-                f"{full_name}: {output['message']} Please check the input requirements of this automaton and try again.",
-            )
-        except KeyError as error:
-            raise ValueError(
-                f"Input inspector output does not have the correct format. Expected keys: {expected_output_keys}"
-            ) from error
-
     input_validator = (
-        partial(validate_input, input_inspector=inspect_input)
+        partial(validate_input, input_inspector=inspect_input, full_name=full_name)
         if validator_engine
         else None
     )
