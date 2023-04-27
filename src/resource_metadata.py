@@ -7,15 +7,15 @@ class ResourceMetadata:
     A class for managing resource metadata in an SQLite database.
 
     Args:
-        db_path (str): Path to the SQLite database file. Default is "resource_metadata.db".
+        db_path (str): Path to the SQLite database file. Default is "db/resource_metadata.db".
     """
 
-    def __init__(self, db_path: str = "resource_metadata.db") -> None:
+    def __init__(self, db_path: str = "db/resource_metadata.db") -> None:
         """
         Initializes a new instance of the ResourceMetadata class.
 
         Args:
-            db_path (str): Path to the SQLite database file. Default is "resource_metadata.db".
+            db_path (str): Path to the SQLite database file. Default is "db/resource_metadata.db".
         """
         self.conn: sqlite3.Connection = sqlite3.connect(db_path)
         self.create_table()

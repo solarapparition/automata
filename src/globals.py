@@ -15,4 +15,4 @@ AUTOMATON_AFFIXES: Dict[str, str] = {
     ).items()
 }
 
-resource_metadata = ResourceMetadata("resource_metadata.db")
+resource_metadata = ResourceMetadata("db/resource_metadata.db")
