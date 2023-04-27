@@ -2,11 +2,9 @@ name: Quiz Creator
 description: Can create quizzes for a particular subject.
 input_requirements:
   - must have the quiz's subject matter
-  - has the difficulty of the questions.
+  - has the difficulty of the questions
 imperatives: null
-instructions:
-  - Verify that the answers to the quiz questions exist and are correct.
-  - Verify that the quiz file exists and contains the quiz.
+instructions: null
 rank: 1
 engine: gpt-3.5-turbo
 input_validator_engine: null

@@ -14,12 +14,9 @@ from langchain.agents import (
     Tool,
     AgentExecutor,
     load_tools,
-    Tool,
 )
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import BaseLLM
-from langchain.chat_models import ChatOpenAI
-from langchain import PromptTemplate, LLMChain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -148,7 +145,9 @@ def load_function(
         run = load_tools(["human"])[0].run
 
     elif file_name == "finalize":
-        run = lambda _: None # not meant to actually be run; the finalize action should be caught by the parser first
+        run = (
+            lambda _: None
+        )  # not meant to actually be run; the finalize action should be caught by the parser first
 
     else:
         raise NotImplementedError(
@@ -297,18 +296,6 @@ def add_run_handling(
             result = run(*args, **kwargs)
             print(postprint)
             return result
-        # except Exception as error:
-        #     if not suppress_errors:
-        #         raise error
-        #     # ignore all errors since delegators should handle automaton failures
-        #     return (
-        #         str(error)
-        #         .replace(
-        #             "Could not parse LLM output: ",
-        #             "The sub-automaton ran into an error while processing the query. Its last thought was: ",
-        #         )
-        #         .replace("`", "```")
-        #     )
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
             print(postprint)
@@ -412,8 +399,8 @@ def load_automaton(
 def main():
     quiz_creator = load_automaton("quiz_creator")
     quiz_creator.run(
-        # "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`."
-        "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
+        "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`."
+        # "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
     )
 
     # assistant = load_automaton("llm_assistant")
