@@ -16,10 +16,10 @@ def extract_function_name(code_chunk: str) -> Union[str, None]:
 
 
 def construct_fn_id(
-    function_name: str, module_prefix: List[str], class_name: Union[str, None]
+    function_name: str, package_dir: Path, module_prefix: List[str], class_name: Union[str, None]
 ) -> str:
     """Construct an ID for a function based on its name, module prefix, and class name."""
-    id_parts = module_prefix.copy()
+    id_parts = [package_dir.name] + module_prefix
     if class_name:
         id_parts.append(class_name)
     id_parts.append(function_name)
