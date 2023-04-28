@@ -1,7 +1,36 @@
 """Utilities for processing Python modules."""
 
 import ast
-from typing import List
+from pathlib import Path
+import re
+from typing import List, Union
+
+
+def extract_function_name(code_chunk: str) -> Union[str, None]:
+    """Extract the name of a function from its definition text, if it exists."""
+    pattern = r"def\s+(\w+)\s*\("
+    match = re.search(pattern, code_chunk)
+    if match:
+        return match.group(1)
+    return None
+
+
+def construct_fn_id(
+    function_name: str, module_prefix: List[str], class_name: Union[str, None]
+) -> str:
+    """Construct an ID for a function based on its name, module prefix, and class name."""
+    id_parts = module_prefix.copy()
+    if class_name:
+        id_parts.append(class_name)
+    id_parts.append(function_name)
+    return ".".join(id_parts)
+
+
+def construct_module_path(module_prefix: List[str], package_dir: Path) -> Path:
+    """Construct the path to the module containing the function."""
+    module_path = package_dir.joinpath(*module_prefix).with_suffix(".py")
+    return module_path
+
 
 def split_module_chunks(code: str) -> List[str]:
     """Split the code of a Python module.
