@@ -40,7 +40,7 @@ def find_model(engine: str) -> BaseLLM:
     raise ValueError(f"Engine {engine} not supported yet.")
 
 
-def save_file(action_input: str, self_name: str, workspace_name: str) -> str:
+def save_text(action_input: str, self_name: str, workspace_name: str) -> str:
     """Save a file."""
     try:
         input_json = json.loads(action_input)
@@ -98,7 +98,7 @@ def load_function(
         "llm_assistant",
         "think",
         "human",
-        "save_file",
+        "save_text",
         "load_file",
         "view_workspace",
         "finalize",
@@ -125,8 +125,8 @@ def load_function(
         assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
         run = assistant_chain.run
 
-    elif file_name == "save_file":
-        run = partial(save_file, self_name=full_name, workspace_name=delegator)
+    elif file_name == "save_text":
+        run = partial(save_text, self_name=full_name, workspace_name=delegator)
 
     elif file_name == "load_file":
         run = partial(load_file, self_name=full_name)
@@ -297,7 +297,7 @@ def add_run_handling(
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
             print(postprint)
-            return "Sub-automaton took too long to process and was stopped."
+            return "Sub-automaton took too long to process and was manually stopped."
 
     return wrapper
 
