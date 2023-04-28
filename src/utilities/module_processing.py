@@ -53,20 +53,22 @@ def split_module_chunks(code: str) -> List[str]:
 
     for node in module.body:
         if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
-            if current_chunk_type != 'import':
+            if current_chunk_type != "import":
                 if current_chunk:
                     chunks.append(current_chunk.rstrip())
                 current_chunk = ""
             current_chunk += ast.unparse(node) + "\n"
-            current_chunk_type = 'import'
+            current_chunk_type = "import"
         elif isinstance(node, ast.Assign):
-            if current_chunk_type != 'variable':
+            if current_chunk_type != "variable":
                 if current_chunk:
                     chunks.append(current_chunk.rstrip())
                 current_chunk = ""
             current_chunk += ast.unparse(node) + "\n"
-            current_chunk_type = 'variable'
-        elif isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+            current_chunk_type = "variable"
+        elif isinstance(node, ast.FunctionDef) or isinstance(
+            node, ast.AsyncFunctionDef
+        ):
             if current_chunk:
                 chunks.append(current_chunk.rstrip())
                 current_chunk = ""
@@ -80,19 +82,21 @@ def split_module_chunks(code: str) -> List[str]:
 
             class_docstring = ast.get_docstring(node)
             if class_docstring:
-                chunks.append(f"class {node.name}:\n    \"\"\"{class_docstring}\"\"\"")
+                chunks.append(f'class {node.name}:\n    """{class_docstring}"""')
             else:
                 chunks.append(f"class {node.name}:")
 
             for item in node.body:
                 if isinstance(item, ast.Assign):
-                    if current_chunk_type != 'class_variable':
+                    if current_chunk_type != "class_variable":
                         if current_chunk:
                             chunks.append(current_chunk.rstrip())
                         current_chunk = ""
                     current_chunk += "    " + ast.unparse(item) + "\n"
-                    current_chunk_type = 'class_variable'
-                elif isinstance(item, ast.FunctionDef) or isinstance(item, ast.AsyncFunctionDef):
+                    current_chunk_type = "class_variable"
+                elif isinstance(item, ast.FunctionDef) or isinstance(
+                    item, ast.AsyncFunctionDef
+                ):
                     if current_chunk:
                         chunks.append(current_chunk.rstrip())
                         current_chunk = ""
@@ -103,6 +107,7 @@ def split_module_chunks(code: str) -> List[str]:
         chunks.append(current_chunk.rstrip())
 
     return chunks
+
 
 def demo() -> None:
     """Run a demo of the split_module_chunks function."""
@@ -132,6 +137,7 @@ def demo() -> None:
     chunks = split_module_chunks(code)
     for chunk in chunks:
         print(chunk)
+
 
 if __name__ == "__main__":
     demo()
