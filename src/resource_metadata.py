@@ -1,3 +1,5 @@
+"""Functionality for managing the resource metadata for the automata."""
+
 import sqlite3
 from typing import Optional, Tuple
 
