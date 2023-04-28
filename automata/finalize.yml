@@ -1,5 +1,5 @@
 name: Finalize Result
-description: Report back on the result of your work.
+description: Once your Plan is complete, you can use this to report back on the result of your work.
 input_requirements:
   - includes the final completion status of the task or question
   - includes the final result of the task or question

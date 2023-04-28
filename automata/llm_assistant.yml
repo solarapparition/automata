@@ -1,7 +1,7 @@
 name: Text Generator
 description: An text generator that can help you create content. Cannot access local files, internet, or previous interactions.
 input_requirements:
-  - includes a descriptive text prompt for the generated content.
+  - includes a descriptive request for the generated content.
   - does not reference interaction with local files, internet, or previous interactions
 imperatives: null
 instructions: null

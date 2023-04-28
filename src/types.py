@@ -29,7 +29,7 @@ class AutomatonOutputParser(AgentOutputParser):
         match = re.search(regex, text, re.DOTALL)
         if not match:
             return AgentAction(
-                "Think",
+                "Think (function 0)",
                 "I didn't post my output in the correct format. I must adjust my output to match the format in my prompt.",
                 text,
             )
