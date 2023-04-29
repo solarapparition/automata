@@ -1,6 +1,7 @@
 """Run a specific automaton and its sub-automata."""
 
 import ast
+from datetime import datetime
 from functools import lru_cache, partial
 import functools
 import json
@@ -26,7 +27,7 @@ import yaml
 
 sys.path.append("")
 
-from src.globals import AUTOMATON_AFFIXES, resource_metadata
+from src.globals import AUTOMATON_AFFIXES, EVENT_LOG_LOCATION, resource_metadata
 from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
 
@@ -155,7 +156,7 @@ def load_function(
     run = add_run_handling(
         run,
         name=full_name,
-        suppress_errors=suppress_errors,
+        delegator=delegator,
         input_validator=input_validator,
     )
 
@@ -277,7 +278,7 @@ def add_run_handling(
     run: Callable,
     name: str,
     input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None,
-    suppress_errors: bool = False,
+    delegator: Union[str, None] = None,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
@@ -288,16 +289,27 @@ def add_run_handling(
         if input_validator:
             valid, error = input_validator(args[0])
             if not valid:
-                return error
+                result = error
         print(preprint)
         try:
             result = run(*args, **kwargs)
-            print(postprint)
-            return result
         except KeyboardInterrupt:
             # manual interruption should escape back to the delegator
-            print(postprint)
-            return "Sub-automaton took too long to process and was manually stopped."
+            result = f"Sub-automaton `{name}` took too long to process and was manually stopped."
+        print(postprint)
+
+        event = {
+            "delegator": delegator,
+            "sub_automaton_name": name,
+            "input": args[0],
+            "result": result,
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        with open(EVENT_LOG_LOCATION, "a", encoding="utf-8") as file:
+            file.write(json.dumps(event) + "\n")
+
+        return result
 
     return wrapper
 
@@ -386,7 +398,7 @@ def load_automaton(
         add_run_handling(
             load_and_run,
             name=full_name,
-            suppress_errors=suppress_errors,
+            delegator=delegator,
             input_validator=input_validator,
         ),
         description_and_input,
