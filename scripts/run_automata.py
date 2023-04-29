@@ -306,7 +306,9 @@ def add_run_handling(
             "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-        with open(EVENT_LOG_LOCATION, "a", encoding="utf-8") as file:
+        with open(
+            EVENT_LOG_LOCATION / f"{delegator}.jsonl", "a", encoding="utf-8"
+        ) as file:
             file.write(json.dumps(event) + "\n")
 
         return result
