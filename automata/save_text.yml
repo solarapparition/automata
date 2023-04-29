@@ -3,10 +3,10 @@ description: Saves text to a file to your workspace.
 input_requirements:
   - "a query of the form {{\"file_name\": <file_name>, \"description\": <description>, \"content\": <text_to_save>}}"
   - <text_to_save> is a string
+input_validator_engine: gpt-3.5-turbo
 imperatives: null
 instructions: null
 rank: 0
 engine: null
-input_validator_engine: gpt-3.5-turbo
 role: function
 sub_automata: null

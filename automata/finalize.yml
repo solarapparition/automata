@@ -5,10 +5,10 @@ input_requirements:
   - includes the final result of the task or question
   - includes the complete path to the location(s) of any artifacts generated
   - "result is in the following format: {{\"completion_status\": <completion_status>, \"result\": <result>, \"generated_artifacts\": [<artifact_location_1>, <artifact_location_2>, ...]}}"
+input_validator_engine: null
 imperatives: null
 instructions: null
 rank: 0
 engine: null
-input_validator_engine: null
 role: function
 sub_automata: null

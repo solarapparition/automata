@@ -3,10 +3,10 @@ description: Can create quizzes for a particular subject.
 input_requirements:
   - must have the quiz's subject matter
   - has the difficulty of the questions
+input_validator_engine: null
 imperatives: null
 instructions: null
 rank: 1
 engine: gpt-3.5-turbo
-input_validator_engine: null
 role: worker
 sub_automata: [llm_assistant, human, think, save_text, view_workspace, load_file, finalize]
