@@ -1,0 +1,11 @@
+name: Recall Learning
+description: Recall information that you have personally learned.
+input_requirements:
+  - a topic or question to recall information about
+input_validator_engine: null
+imperatives: null
+instructions: null
+rank: 0
+engine: null
+role: function
+sub_automata: null
