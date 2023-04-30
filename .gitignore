@@ -131,3 +131,4 @@ dmypy.json
 workspace
 .DS_store
 db
+event_log.*

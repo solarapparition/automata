@@ -139,7 +139,7 @@ def load_function(
         )
 
     elif file_name == "think":
-        run = lambda thought: f"I pause to reflect on my next steps. {thought}"
+        run = lambda thought: f"I am reflecting on my next steps. {thought}"
 
     elif file_name == "human":
         run = load_tools(["human"])[0].run
@@ -311,7 +311,7 @@ def add_run_handling(
         }
 
         with open(
-            EVENT_LOG_LOCATION / f"{delegator}.jsonl", "a", encoding="utf-8"
+            Path(f"automata/{delegator}/event_log.jsonl"), "a", encoding="utf-8"
         ) as file:
             file.write(json.dumps(event) + "\n")
 
