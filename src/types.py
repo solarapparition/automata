@@ -30,10 +30,9 @@ class AutomatonOutputParser(AgentOutputParser):
         if not match:
             return AgentAction(
                 "Think (function 0)",
-                "I didn't post my output in the correct format. I must adjust my output to match the format in my prompt.",
+                "I must examine the plan and decide on what Sub-Automaton to delegate to and what Sub-Automaton Input to send.",
                 text,
             )
-            # raise OutputParserException(f"Could not parse LLM output: `{text}`")
         action = match.group(1).strip()
         action_input = match.group(2)
         if self.final_answer_action in action:

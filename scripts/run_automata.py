@@ -138,7 +138,7 @@ def load_function(
         )
 
     elif file_name == "think":
-        run = lambda thought: f"I pause to think about the following: {thought}"
+        run = lambda thought: f"I pause to reflect on my next steps. {thought}"
 
     elif file_name == "human":
         run = load_tools(["human"])[0].run
