@@ -327,7 +327,7 @@ def load_automaton(
     """Load an automaton from a YAML file."""
 
     data = yaml.load(
-        (Path("automata") / f"{file_name}.yml").read_text(encoding="utf-8"),
+        Path(f"automata/{file_name}/spec.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
