@@ -148,6 +148,9 @@ def load_function(
             lambda _: None
         )  # not meant to actually be run; the finalize action should be caught by the parser first
 
+    elif file_name == "search":
+        run = load_tools(["google-serper"], llm=engine)[0].run
+
     else:
         raise NotImplementedError(
             f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
