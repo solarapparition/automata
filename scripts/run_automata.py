@@ -119,6 +119,9 @@ def inspect_input_specs(input: str, requirements: List[str]) -> Dict[str, str]:
     ...
 
 
+inspect_input_specs.__name__ = "inspect_input"
+
+
 def validate_input(
     run_input: str, input_inspector: Callable[[str], str], full_name: str
 ) -> Tuple[bool, str]:

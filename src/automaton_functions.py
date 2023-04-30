@@ -31,7 +31,7 @@ def save_text(action_input: str, self_name: str, workspace_name: str) -> str:
         description = input_json.get("description", "")
     except (KeyError, json.JSONDecodeError):
         return "Could not parse input. Please provide the input in the following format: {file_name: <file_name>, description: <description>, content: <content>}"
-    path: Path = Path("workspace") / workspace_name / file_name
+    path: Path = Path(f"workspace/{workspace_name}/{file_name}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(str(content), encoding="utf-8")
     resource_metadata.set_description(str(path), description)
