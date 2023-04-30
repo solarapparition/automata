@@ -32,7 +32,7 @@ from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
 
 
-def find_model(engine: str) -> BaseLLM:
+def create_engine(engine: str) -> BaseLLM:
     """Create the model to use."""
     if engine is None:
         return None
@@ -92,9 +92,9 @@ def load_function(
     input_validator: Callable[[str], Tuple[bool, str]] = None,
     suppress_errors: bool = False,
 ) -> Automaton:
-    """Load a function, which uses the same interface as automata but does not make decisions."""
+    """Load a function, which are basically wrappers around external functionality (including other agents)."""
 
-    model = find_model(data["engine"])
+    engine = create_engine(data["engine"])
     supported_functions = [
         "llm_assistant",
         "think",
@@ -103,6 +103,7 @@ def load_function(
         "load_file",
         "view_workspace",
         "finalize",
+        "search",
     ]
 
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
@@ -123,7 +124,7 @@ def load_function(
         chat_prompt = ChatPromptTemplate.from_messages(
             [system_message_prompt, human_message_prompt]
         )
-        assistant_chain = LLMChain(llm=model, prompt=chat_prompt)
+        assistant_chain = LLMChain(llm=engine, prompt=chat_prompt)
         run = assistant_chain.run
 
     elif file_name == "save_text":
@@ -344,7 +345,7 @@ def load_automaton(
     validator_engine = data["input_validator_engine"]
     if validator_engine:
         inspect_input = make_llm_function(
-            inspect_input_specs, model=find_model(validator_engine)
+            inspect_input_specs, model=create_engine(validator_engine)
         )
         inspect_input = partial(
             inspect_input, input_requirements=data["input_requirements"]
@@ -367,7 +368,7 @@ def load_automaton(
             suppress_errors=True,
         )
 
-    llm = find_model(engine)
+    llm = create_engine(engine)
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
     def load_and_run(*args, **kwargs) -> str:
