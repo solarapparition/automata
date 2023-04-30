@@ -15,6 +15,4 @@ AUTOMATON_AFFIXES: Dict[str, str] = {
     ).items()
 }
 
-EVENT_LOG_LOCATION = Path("db/event_logs")
-
 resource_metadata = ResourceMetadata("db/resource_metadata.db")

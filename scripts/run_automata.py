@@ -190,9 +190,7 @@ def add_run_handling(
 
 
 @lru_cache(maxsize=None)
-def load_automaton(
-    file_name: str, delegator: Union[str, None] = None, suppress_errors: bool = False
-) -> Automaton:
+def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = yaml.load(
@@ -238,13 +236,11 @@ def load_automaton(
         return run(*args, **kwargs)
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
-    def load_and_run(*args, **kwargs) -> str:
+    def load_and_run_automaton(*args, **kwargs) -> str:
         sub_automata = [
-            load_automaton(name, delegator=file_name, suppress_errors=True)
-            for name in data["sub_automata"]
+            load_automaton(name, delegator=file_name) for name in data["sub_automata"]
         ]
         prompt = create_automaton_prompt(
-            # input_requirements=input_requirements,
             self_instructions=data["instructions"],
             self_imperatives=data["imperatives"],
             role_info=get_role_info(data["role"]),
@@ -252,7 +248,7 @@ def load_automaton(
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
+        llm_chain = LLMChain(llm=engine, prompt=prompt)
         agent_executor = AgentExecutor.from_agent_and_tools(
             agent=ZeroShotAgent(
                 llm_chain=llm_chain,

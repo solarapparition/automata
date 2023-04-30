@@ -30,7 +30,7 @@ class AutomatonOutputParser(AgentOutputParser):
         if not match:
             return AgentAction(
                 "Think (function 0)",
-                "I must examine the plan and decide on what Sub-Automaton to delegate to and what Sub-Automaton Input to send.",
+                "I must examine the Plan and decide on what Sub-Automaton to delegate to and what Sub-Automaton Input to send.",
                 text,
             )
         action = match.group(1).strip()
