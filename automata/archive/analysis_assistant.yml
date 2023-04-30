@@ -1,8 +1,0 @@
-name: "Analysis Assistant"
-description: "This is an analysis assistant who perform analysis on some material."
-input_requirements: "Must have the full text of the material to be analyzed; must have analysis task."
-imperatives: null
-rank: 0
-engine: gpt-4
-role: function
-sub_automata: null

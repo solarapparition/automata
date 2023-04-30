@@ -1,8 +1,0 @@
-name: "Terminal"
-description: "Executes commands in a terminal. Output will be any output from running that command."
-input_requirements: 1) use valid shell commands such as "ls" or "cat" 2) do NOT use `nano` or `vim`
-imperatives: null
-rank: 0
-engine: null
-role: function
-sub_automata: null

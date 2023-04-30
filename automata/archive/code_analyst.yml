@@ -1,9 +1,0 @@
-name: Code Analyst
-description: An analysis automaton for understanding a file or directory containing code.
-input_requirements: 1) a path to the code file or directory; 2) a question about the code in the file or directory.
-imperatives:
-  - Gain a good conceptual understanding of the code you are given.
-rank: 1
-engine: gpt-4
-role: researcher
-sub_automata: [terminal, coding_assistant]
