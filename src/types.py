@@ -25,7 +25,7 @@ class AutomatonOutputParser(AgentOutputParser):
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         # \s matches against tab/newline/whitespace
-        regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
         match = re.search(regex, text, re.DOTALL)
         if not match:
             return AgentAction(
@@ -34,7 +34,7 @@ class AutomatonOutputParser(AgentOutputParser):
                 text,
             )
         action = match.group(1).strip()
-        action_input = match.group(2)
+        action_input = match.group(3)
         if self.final_answer_action in action:
             return AgentFinish(
                 {"output": action_input}, text
