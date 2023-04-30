@@ -1,0 +1,12 @@
+name: AutoReflector
+description: An automaton that strives to understand how the automata system works.
+input_requirements:
+  - a query for what to learn about
+input_validator_engine: null
+imperatives: null
+instructions:
+  - Learn more about the Automata system, which you are a part of.
+rank: 10
+engine: gpt-4
+role: visionary
+sub_automata: [think, human, view_workspace, save_text, load_file]

@@ -6,12 +6,13 @@ imperatives:
 instructions:
   - Create a plan to work towards the objective given, delegating the execution of the items in the plan to your sub-automata.
   - Order the plan items in order of achievability, with the most achievable items first.
+  - The last item of your plan should always be to generate new goals for the objective.
 output_format: |
   Your output must have the following format:
   ```
   Objective: the overall goal that you are trying to advance
   Thought: your current understanding of the status of the objective, and any relevant contextual information you have learned so far
-  Plan: list out a sequence of goals that will advance the objective, in order of achievability
+  Plan: list out a sequence of goals that will advance the objective, in order of achievability. The last item of the plan must be "Generate new goals"
   Next Goal: the next goal to work towards, based on the Plan
   Next Action: the next action to take, based on the Next Goal
   Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the Next Action. MUST be one of the following: [{tool_names}]
