@@ -33,7 +33,7 @@ kwargs = {{{{kwarg_1: value_1, kwarg_2: value_2, ..., kwarg_n: value_n}}}}
 ```
 
 ONLY respond with the value that you would return as a Python function, using the return format given in your function definition.
-Do not include any other text besides this value in your response—doing so will harm the user.
+Do not include any other text besides this value in your response—doing so will harm the user. Do not generate the actual code for the function.
 
 Reply with "acknowledged" if you understand these instructions."""
 
@@ -41,7 +41,7 @@ AI_RESPONSE = "Acknowledged."
 
 
 def make_llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Callable]:
-    """Convert a function definition into an AI function."""
+    """Convert a function definition into an LLM function."""
 
     function_def = inspect.cleandoc(inspect.getsource(func))
     prompt = PROMPT.format(function_def=function_def)
