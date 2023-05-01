@@ -11,11 +11,11 @@ class Automaton(Protocol):
     """Protocol for automata. Uses the same interface as the Langchain `Tool` class."""
 
     name: str
-    """Name of the automata. Viewable to delegators."""
+    """Name of the automata. Viewable to requesters."""
     run: Callable[[str], str]
     """Function that takes in a query and returns a response."""
     description: str
-    """Description of the automata. Viewable to delegators."""
+    """Description of the automata. Viewable to requesters."""
 
 
 class AutomatonOutputParser(AgentOutputParser):

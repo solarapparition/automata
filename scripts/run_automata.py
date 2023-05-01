@@ -81,7 +81,7 @@ def add_run_handling(
     run: Callable,
     name: str,
     input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None,
-    delegator: Union[str, None] = None,
+    requester: Union[str, None] = None,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
@@ -97,12 +97,12 @@ def add_run_handling(
         try:
             result = run(*args, **kwargs)
         except KeyboardInterrupt:
-            # manual interruption should escape back to the delegator
+            # manual interruption should escape back to the requester
             result = f"Sub-automaton `{name}` took too long to process and was manually stopped."
         print(postprint)
 
         event = {
-            "delegator": delegator,
+            "requester": requester,
             "sub_automaton_name": name,
             "input": args[0],
             "result": result,
@@ -110,7 +110,7 @@ def add_run_handling(
         }
 
         with open(
-            Path(f"automata/{delegator}/event_log.jsonl"), "a", encoding="utf-8"
+            Path(f"automata/{requester}/event_log.jsonl"), "a", encoding="utf-8"
         ) as file:
             file.write(json.dumps(event) + "\n")
 
@@ -120,7 +120,7 @@ def add_run_handling(
 
 
 @lru_cache(maxsize=None)
-def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automaton:
+def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = yaml.load(
@@ -161,14 +161,14 @@ def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automa
             file_name,
             data,
             engine,
-            delegator=delegator,
+            requester=requester,
         )
         return run(*args, **kwargs)
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
     def load_and_run_automaton(*args, **kwargs) -> str:
         sub_automata = [
-            load_automaton(name, delegator=file_name) for name in data["sub_automata"]
+            load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
         prompt = create_automaton_prompt(
             objective=data["objective"],
@@ -201,7 +201,7 @@ def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automa
         add_run_handling(
             load_and_run,
             name=full_name,
-            delegator=delegator,
+            requester=requester,
             input_validator=input_validator,
         ),
         description_and_input,
@@ -210,7 +210,7 @@ def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automa
 
 
 def main():
-    quiz_creator = load_automaton("quiz_creator")
+    quiz_creator = load_automaton("quiz_creator", requester="user")
     quiz_creator.run(
         "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`."
         # "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
