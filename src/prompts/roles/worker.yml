@@ -7,9 +7,9 @@ output_format: |
   ```
   Thought: list out known facts about the task, as well as any contextual information you have learned so far
   Objective Evaluation: think through step by step reasons why the Request might not align with your Objective, and then decide whether to reject or accept the Request; only accept the Request if you are certain that directly aligns with your Objective
-  Plan: list out a sequence of actions that will complete the Request (if accepted), or that will reject the Request (if rejected)
-  Next Action: the next action to take, based on the Plan
-  Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the Next Action. MUST be one of the following: [{tool_names}]
+  Next Action Ideas: generate a non-exhaustive ideas list for the Next Action to take, based on the Request and the sub-automata that are available to you
+  Next Action: the next action to take, chosen from the Next Action Ideas
+  Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the next action. MUST be one of the following: [{tool_names}]
   Input Requirements: copy the input requirements of the sub-automaton you are using, to ensure that you follow them
   Sub-Automaton Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. Sub-automata are memoryless
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
