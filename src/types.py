@@ -24,13 +24,15 @@ class AutomatonOutputParser(AgentOutputParser):
     final_answer_action = "Finalize Result"
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+        """Parse the output of the automaton."""
+
         # \s matches against tab/newline/whitespace
-        regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
-        match = re.search(regex, text, re.DOTALL)
+        action_regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        match = re.search(action_regex, text, re.DOTALL)
         if not match:
             return AgentAction(
                 "Think (function 0)",
-                "I must examine the Plan and decide on what Sub-Automaton to delegate to and what Sub-Automaton Input to send.",
+                "I must examine the Plan and decide on what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
                 text,
             )
         action = match.group(1).strip()

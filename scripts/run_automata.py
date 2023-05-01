@@ -21,7 +21,7 @@ import yaml
 
 sys.path.append("")
 
-from src.automaton_functions import load_function
+from src.function_loading import load_function
 from src.globals import AUTOMATON_AFFIXES
 from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
