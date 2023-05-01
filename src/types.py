@@ -32,7 +32,7 @@ class AutomatonOutputParser(AgentOutputParser):
         if not match:
             return AgentAction(
                 "Think (function 0)",
-                "I must examine the Plan and decide on what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
+                "I must determine what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
                 text,
             )
         action = match.group(1).strip()
@@ -41,4 +41,4 @@ class AutomatonOutputParser(AgentOutputParser):
             return AgentFinish(
                 {"output": action_input}, text
             )
-        return AgentAction(action, action_input.strip(" ").strip('"'), text)
+        return AgentAction(action, action_input.strip(" ").strip('"').strip("."), text)

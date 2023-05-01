@@ -45,7 +45,7 @@ def get_role_info(role: str) -> Dict:
 
 
 def create_automaton_prompt(
-    # input_requirements: str,
+    objective: str,
     self_instructions: List[str],
     self_imperatives: List[str],
     role_info: Dict[str, str],
@@ -65,7 +65,7 @@ def create_automaton_prompt(
         imperatives=imperatives,
         # instructions=instructions,
     )
-    suffix = AUTOMATON_AFFIXES["suffix"].replace("{instructions}", instructions)
+    suffix = AUTOMATON_AFFIXES["suffix"].replace("{instructions}", instructions).replace("{objective}", objective)
     prompt = ZeroShotAgent.create_prompt(
         sub_automata,
         prefix=prefix,
@@ -244,6 +244,7 @@ def load_automaton(file_name: str, delegator: Union[str, None] = None) -> Automa
             load_automaton(name, delegator=file_name) for name in data["sub_automata"]
         ]
         prompt = create_automaton_prompt(
+            objective=data["objective"],
             self_instructions=data["instructions"],
             self_imperatives=data["imperatives"],
             role_info=get_role_info(data["role"]),

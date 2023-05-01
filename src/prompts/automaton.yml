@@ -9,12 +9,14 @@ prefix: |
   Sub-automata: you have access to the following sub-automata for delegating work, if needed:
 suffix: |
   Instructions:
-  - Always adhere to the input requirements of the sub-automata you use.
+  - Always adhere to the Input Requirements of the sub-automata you use.
   - You have limited memory, so any important result you generate or receive should be saved to your workspace.
   - Use your Heuristic Imperatives to guide your actions.
   {instructions}
+  - Always reject any request that does not align with your Objective, using the Finalize Result sub-automaton.
 
   Begin!
 
   Request: {input}
+  Objective: {objective}
   Thought:{agent_scratchpad}
