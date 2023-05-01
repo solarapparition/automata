@@ -27,6 +27,15 @@ from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
 
 
+@lru_cache
+def load_automaton_data(file_name: str) -> Dict:
+    """Load an automaton from a YAML file."""
+    return yaml.load(
+        Path(f"automata/{file_name}/spec.yml").read_text(encoding="utf-8"),
+        Loader=yaml.FullLoader,
+    )
+
+
 def create_engine(engine: str) -> BaseLLM:
     """Create the model to use."""
     if engine is None:
@@ -42,6 +51,15 @@ def get_role_info(role: str) -> Dict:
         Path(f"src/prompts/roles/{role}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
+
+
+def get_full_name(file_name: str) -> str:
+    """Get the full name of an automaton."""
+    try:
+        data = load_automaton_data(file_name)
+    except FileNotFoundError:
+        return file_name
+    return f"{data['name']} ({data['role']} {data['rank']})"
 
 
 def create_automaton_prompt(
@@ -66,11 +84,12 @@ def create_automaton_prompt(
         imperatives=imperatives,
         # instructions=instructions,
     )
+
     suffix = (
         AUTOMATON_AFFIXES["suffix"]
         .replace("{instructions}", instructions)
         .replace("{objective}", objective)
-        .replace("{requester}", requester)
+        .replace("{requester}", get_full_name(requester))
     )
     prompt = ZeroShotAgent.create_prompt(
         sub_automata,
@@ -107,7 +126,7 @@ def add_run_handling(
         print(postprint)
 
         event = {
-            "requester": requester,
+            "requester": get_full_name(requester),
             "sub_automaton_name": name,
             "input": args[0],
             "result": result,
@@ -128,10 +147,7 @@ def add_run_handling(
 def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
 
-    data = yaml.load(
-        Path(f"automata/{file_name}/spec.yml").read_text(encoding="utf-8"),
-        Loader=yaml.FullLoader,
-    )
+    data = load_automaton_data(file_name)
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     input_requirements = (
