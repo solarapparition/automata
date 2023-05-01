@@ -7,7 +7,7 @@ Inspired by AI-Functions (https://github.com/Torantulino/AI-Functions) and Marvi
 
 from functools import partial, wraps
 import inspect
-from typing import Callable, Union
+from typing import Callable
 
 from langchain import LLMChain
 from langchain.llms import BaseLLM
