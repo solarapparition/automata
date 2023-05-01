@@ -17,6 +17,7 @@ suffix: |
 
   Begin!
 
+  Requester: {requester}
   Request: {input}
   Objective: {objective}
   Thought:{agent_scratchpad}

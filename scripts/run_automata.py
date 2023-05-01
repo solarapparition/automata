@@ -50,6 +50,7 @@ def create_automaton_prompt(
     self_imperatives: List[str],
     role_info: Dict[str, str],
     sub_automata: List[Tool],
+    requester: str,
 ) -> PromptTemplate:
     """Put together a prompt for an automaton."""
 
@@ -65,7 +66,12 @@ def create_automaton_prompt(
         imperatives=imperatives,
         # instructions=instructions,
     )
-    suffix = AUTOMATON_AFFIXES["suffix"].replace("{instructions}", instructions).replace("{objective}", objective)
+    suffix = (
+        AUTOMATON_AFFIXES["suffix"]
+        .replace("{instructions}", instructions)
+        .replace("{objective}", objective)
+        .replace("{requester}", requester)
+    )
     prompt = ZeroShotAgent.create_prompt(
         sub_automata,
         prefix=prefix,
@@ -176,6 +182,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
             self_imperatives=data["imperatives"],
             role_info=get_role_info(data["role"]),
             sub_automata=sub_automata,
+            requester=requester,
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
