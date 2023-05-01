@@ -82,7 +82,6 @@ def create_automaton_prompt(
     return prompt
 
 
-
 def add_run_handling(
     run: Callable,
     name: str,

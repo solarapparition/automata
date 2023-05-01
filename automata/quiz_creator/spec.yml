@@ -1,6 +1,6 @@
 name: Quiz Creator
 description: Can create quizzes for a particular subject.
-objective: your main objective is to create or update quizzes.
+objective: My main objective is to create or update quizzes.
 input_requirements:
   - must have the quiz's subject matter
   - has the difficulty of the questions
