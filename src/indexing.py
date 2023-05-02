@@ -56,6 +56,11 @@ def create_module_index(
     index = GPTSimpleVectorIndex(nodes)
     return index
 
+
+def create_notebook_module_index() -> GPTSimpleVectorIndex:
+    """Create an index for an automaton notebook."""
+
+
 def demo() -> None:
     """Demo the indexing functionality."""
     index = create_module_index(Path("scripts"), ["run_automata"])
