@@ -2,8 +2,8 @@ name: Notebook Tester
 description: Tests functionality of the notebook.
 objective: My main objective is to test the functionality of my notebook.
 input_requirements:
-  - a request to read or write to a notebook
-input_validator_engine: null
+  - related to testing notebook functionality
+input_validator_engine: gpt-3.5-turbo
 imperatives: null
 instructions: null
 rank: 1
