@@ -166,9 +166,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         inspect_input = make_llm_function(
             inspect_input_specs, model=create_engine(validator_engine)
         )
-        inspect_input = partial(
-            inspect_input, input_requirements=data["input_requirements"]
-        )
+        inspect_input = partial(inspect_input, requirements=data["input_requirements"])
 
     input_validator = (
         partial(validate_input, input_inspector=inspect_input, full_name=full_name)
