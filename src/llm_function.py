@@ -32,12 +32,12 @@ args = (arg_1, arg_2, ..., arg_n,)
 kwargs = {{{{kwarg_1: value_1, kwarg_2: value_2, ..., kwarg_n: value_n}}}}
 ```
 
-ONLY respond with the value that you would return as a Python function, using the return format given in your function definition.
+ONLY respond with the value that you would return as the Python function, using the return format given in your function definition.
 Do not include any other text besides this value in your response—doing so will harm the user. Do not generate the actual code for the function.
 
 Reply with "acknowledged" if you understand these instructions."""
 
-AI_RESPONSE = "Acknowledged."
+AI_RESPONSE = "Acknowledged. I will only reply with the function return value."
 
 
 def make_llm_function(func: Callable, model: BaseLLM) -> Callable[[Callable], Callable]:
