@@ -30,7 +30,7 @@ def create_python_code_node(
     return node
 
 
-def create_module_index(
+def create_py_module_index(
     package_dir: Path, module_prefix: List[str]
 ) -> GPTSimpleVectorIndex:
     """Create an index for a Python module."""
@@ -63,9 +63,10 @@ def create_notebook_module_index() -> GPTSimpleVectorIndex:
 
 def demo() -> None:
     """Demo the indexing functionality."""
-    index = create_module_index(Path("scripts"), ["run_automata"])
+    index = create_py_module_index(Path("scripts"), ["run_automata"])
     print(index.query("tell me about this module"))
     print(index.query("tell me about the `load_automaton` function"))
+
 
 if __name__ == "__main__":
     demo()
