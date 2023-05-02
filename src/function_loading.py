@@ -21,6 +21,7 @@ from langchain.prompts.chat import (
 sys.path.append("")
 
 from src.globals import resource_metadata
+from src.indexing import create_notebook_module_index
 
 
 def save_text(action_input: str, self_name: str, workspace_name: str) -> str:
@@ -69,6 +70,9 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
 
 def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     """Open a notebook and perform a read or write action on it."""
+
+    # > create notebook index if it doesn't exist
+    breakpoint()
     try:
         input_json = json.loads(action_input)
     except json.JSONDecodeError:
@@ -82,6 +86,10 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     if mode == "read" and "topic" not in input_json:
         return 'Could not parse input. Please include the "topic" value in your input.'
     if mode == "read":
+        breakpoint()
+        # index = create_py_module_index(Path("scripts"), ["run_automata"])
+        # print(index.query("tell me about this module"))
+        query_index()
         return "Your notebook is empty."  # TODO: implement
     if mode == "write" and not all(key in input_json for key in ("topic", "content")):
         return 'Could not parse input. Please include the "topic" and "content" values in your input.'
@@ -95,6 +103,10 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
             Path(f"automata/{requester}/notebook.jsonl"), "a", encoding="utf-8"
         ) as file:
             file.write(json.dumps(note) + "\n")
+
+        update_index()
+        breakpoint()
+        return f"{self_name}: successfully added note to notebook."
 
 
 def load_function(
