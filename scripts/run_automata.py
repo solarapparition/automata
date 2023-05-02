@@ -115,15 +115,16 @@ def add_run_handling(
     def wrapper(*args, **kwargs):
         if input_validator:
             valid, error = input_validator(args[0])
-            if not valid:
-                result = error
-        print(preprint)
-        try:
-            result = run(*args, **kwargs)
-        except KeyboardInterrupt:
-            # manual interruption should escape back to the requester
-            result = f"Sub-automaton `{name}` took too long to process and was manually stopped."
-        print(postprint)
+        if input_validator and not valid:
+            result = error
+        else:
+            print(preprint)
+            try:
+                result = run(*args, **kwargs)
+            except KeyboardInterrupt:
+                # manual interruption should escape back to the requester
+                result = f"Sub-automaton `{name}` took too long to process and was manually stopped."
+            print(postprint)
 
         event = {
             "requester": get_full_name(requester),
