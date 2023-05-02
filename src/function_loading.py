@@ -105,17 +105,6 @@ def load_function(
 ) -> Callable[[str], str]:
     """Load a function, which are basically wrappers around external functionality (including other agents)."""
 
-    supported_functions = [
-        "llm_assistant",
-        "think",
-        "human",
-        "save_text",
-        "load_file",
-        "view_workspace",
-        "finalize",
-        "search",
-    ]
-
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
 
     if file_name == "llm_assistant":
@@ -158,8 +147,6 @@ def load_function(
         run = partial(open_notebook, self_name=full_name, requester=requester)
 
     else:
-        raise NotImplementedError(
-            f"Unsupported function name: {file_name}. Only {supported_functions} are supported for now."
-        )
+        raise NotImplementedError(f"Unsupported function name: {file_name}.")
 
     return run
