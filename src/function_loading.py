@@ -1,5 +1,6 @@
 """Run a specific automaton and its sub-automata."""
 
+from datetime import datetime
 from functools import partial
 import json
 from pathlib import Path
@@ -66,6 +67,36 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
     return f"{self_name}: files in your workspace:\n{files}"
 
 
+def open_notebook(action_input: str, self_name: str, requester: str) -> str:
+    """Open a notebook and perform a read or write action on it."""
+    try:
+        input_json = json.loads(action_input)
+    except json.JSONDecodeError:
+        return "Could not parse input. Please provide the input in valid JSON format."
+    try:
+        mode = input_json["mode"]
+    except KeyError:
+        return 'Could not parse input. Please include the "mode" value in your input.'
+    if mode not in ("read", "write"):
+        return 'Could not parse input. Please provide a valid "mode" value (either "read" or "write").'
+    if mode == "read" and "topic" not in input_json:
+        return 'Could not parse input. Please include the "topic" value in your input.'
+    if mode == "read":
+        return "Your notebook is empty."  # TODO: implement
+    if mode == "write" and not all(key in input_json for key in ("topic", "content")):
+        return 'Could not parse input. Please include the "topic" and "content" values in your input.'
+    if mode == "write":
+        note = {
+            "topic": input_json["topic"],
+            "content": input_json["content"],
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        with open(
+            Path(f"automata/{requester}/notebook.jsonl"), "a", encoding="utf-8"
+        ) as file:
+            file.write(json.dumps(note) + "\n")
+
+
 def load_function(
     file_name: str,
     data: dict,
@@ -122,6 +153,9 @@ def load_function(
 
     elif file_name == "search":
         run = load_tools(["google-serper"], llm=engine)[0].run
+
+    elif file_name == "notebook":
+        run = partial(open_notebook, self_name=full_name, requester=requester)
 
     else:
         raise NotImplementedError(

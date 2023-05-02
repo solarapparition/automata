@@ -1,0 +1,12 @@
+name: Notebook
+description: Read from your notes, or write to it.
+input_requirements:
+  - 'allowed format 1: {"mode": "read", "topic": "<topic_name>"}: read your notes about a specific topic'
+  - 'allowed format 2: {"mode": "write", "topic": "<topic_name>", "content": "<content>"}: write notes about a specific topic'
+input_validator_engine: gpt-3.5-turbo
+imperatives: null
+instructions: null
+rank: 0
+engine: null
+role: function
+sub_automata: null
