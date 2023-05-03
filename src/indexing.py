@@ -57,8 +57,16 @@ def create_py_module_index(
     return index
 
 
-def create_notebook_module_index() -> GPTSimpleVectorIndex:
-    """Create an index for an automaton notebook."""
+def create_notebook_module_index(notebook_path: Path) -> GPTVectorStoreIndex:
+    """Create an index for an automaton notebook"""
+    if not notebook_path.suffix == ".jsonl":
+        raise ValueError("Automaton notebook must be a JSONL file.")
+    with open(notebook_path, encoding="utf-8") as file:
+        nodes = (Node(text=entry, doc_id=json.loads(entry)["timestamp"]) for entry in file)
+        nodes = list(nodes)
+        for node in nodes:
+            node.relationships[DocumentRelationship.SOURCE] = str(notebook_path)
+    return GPTVectorStoreIndex(nodes)
 
 
 def demo() -> None:
