@@ -88,12 +88,16 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
         return 'Could not parse input. Please include the "mode" value in your input.'
     if mode not in ("read", "write"):
         return 'Could not parse input. Please provide a valid "mode" value (either "read" or "write").'
-    if mode == "read" and "topic" not in input_json:
-        return 'Could not parse input. Please include the "topic" value in your input.'
+    if mode == "read" and "question" not in input_json:
+        return 'Could not parse input. Please include the "question" value in your input.'
     if mode == "read":
+
+        # > parse the response
         breakpoint()
-        # index = create_py_module_index(Path("scripts"), ["run_automata"])
-        # print(index.query("tell me about this module"))
+        print(notebook_index.query(input_json["question"]))
+        breakpoint()
+
+        breakpoint()
         query_index()
         return "Your notebook is empty."  # TODO: implement
     if mode == "write" and not all(key in input_json for key in ("topic", "content")):
