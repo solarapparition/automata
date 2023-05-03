@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 from typing import Callable, Union
 
+from llama_index import GPTVectorStoreIndex
 from langchain import LLMChain
 from langchain.agents import (
     load_tools,
@@ -70,9 +71,13 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
 
 def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     """Open a notebook and perform a read or write action on it."""
-
-    # > create notebook index if it doesn't exist
-    breakpoint()
+    notebook_loc = Path(f"automata/{requester}/notebook.jsonl")
+    notebook_index_loc = Path(f"automata/{requester}/notebook_index.json")
+    if notebook_index_loc.exists():
+        notebook_index = GPTVectorStoreIndex.load_from_disk(notebook_index_loc)
+    else:
+        notebook_index = create_notebook_module_index(notebook_loc)
+        notebook_index.save_to_disk(notebook_index_loc)
     try:
         input_json = json.loads(action_input)
     except json.JSONDecodeError:
