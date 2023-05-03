@@ -1,9 +1,10 @@
 """Functions for indexing Python code."""
 
+import json
 from pathlib import Path
 from typing import List, Union
 
-from llama_index import GPTSimpleVectorIndex
+from llama_index import GPTVectorStoreIndex
 from llama_index.data_structs.node_v2 import Node, DocumentRelationship
 
 from src.utilities.module_processing import (
@@ -32,7 +33,7 @@ def create_python_code_node(
 
 def create_py_module_index(
     package_dir: Path, module_prefix: List[str]
-) -> GPTSimpleVectorIndex:
+) -> GPTVectorStoreIndex:
     """Create an index for a Python module."""
     path = package_dir.joinpath(*module_prefix).with_suffix(".py")
     code = path.read_text(encoding="utf-8")
@@ -53,7 +54,7 @@ def create_py_module_index(
             ].get_doc_id()
         if i < len(nodes) - 1:
             node.relationships[DocumentRelationship.NEXT] = nodes[i + 1].get_doc_id()
-    index = GPTSimpleVectorIndex(nodes)
+    index = GPTVectorStoreIndex(nodes)
     return index
 
 
