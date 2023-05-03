@@ -133,3 +133,4 @@ workspace
 db
 event_log.*
 notebook.*
+notebook_index.*
