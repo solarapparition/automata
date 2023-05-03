@@ -99,18 +99,20 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     if mode == "write" and not all(key in input_json for key in ("topic", "content")):
         return 'Could not parse input. Please include the "topic" and "content" values in your input.'
     if mode == "write":
-        note = {
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        entry = {
             "topic": input_json["topic"],
             "content": input_json["content"],
-            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": timestamp,
         }
-        with open(
-            Path(f"automata/{requester}/notebook.jsonl"), "a", encoding="utf-8"
-        ) as file:
-            file.write(json.dumps(note) + "\n")
-
-        update_index()
-        breakpoint()
+        from llama_index.data_structs.node_v2 import Node, DocumentRelationship
+        entry = json.dumps(entry)
+        with open(notebook_loc, "a", encoding="utf-8") as file:
+            file.write(entry + "\n")
+        node = Node(text=entry, doc_id=timestamp)
+        node.relationships[DocumentRelationship.SOURCE] = str(notebook_loc)
+        notebook_index.insert_nodes([node])
+        notebook_index.save_to_disk(notebook_index_loc)
         return f"{self_name}: successfully added note to notebook."
 
 
