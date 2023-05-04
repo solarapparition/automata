@@ -73,10 +73,10 @@ def create_automaton_prompt(
     """Put together a prompt for an automaton."""
 
     imperatives = role_info["imperatives"] + (self_imperatives or [])
-    imperatives = "\n".join([f"- {imperative}" for imperative in imperatives])
+    imperatives = "\n".join([f"- {imperative}" for imperative in imperatives]) or "N/A"
 
     instructions = role_info["instructions"] + (self_instructions or [])
-    instructions = "\n".join([f"- {instruction}" for instruction in instructions])
+    instructions = "\n".join([f"- {instruction}" for instruction in instructions]) or "N/A"
 
     prefix = AUTOMATON_AFFIXES["prefix"].format(
         # input_requirements=input_requirements,
