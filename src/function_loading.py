@@ -91,15 +91,7 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     if mode == "read" and "question" not in input_json:
         return 'Could not parse input. Please include the "question" value in your input.'
     if mode == "read":
-
-        # > parse the response
-        breakpoint()
-        print(notebook_index.query(input_json["question"]))
-        breakpoint()
-
-        breakpoint()
-        query_index()
-        return "Your notebook is empty."  # TODO: implement
+        return str(notebook_index.query(input_json["question"]))
     if mode == "write" and not all(key in input_json for key in ("topic", "content")):
         return 'Could not parse input. Please include the "topic" and "content" values in your input.'
     if mode == "write":
@@ -109,7 +101,6 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
             "content": input_json["content"],
             "timestamp": timestamp,
         }
-        from llama_index.data_structs.node_v2 import Node, DocumentRelationship
         entry = json.dumps(entry)
         with open(notebook_loc, "a", encoding="utf-8") as file:
             file.write(entry + "\n")
