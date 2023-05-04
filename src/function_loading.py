@@ -8,10 +8,9 @@ import sys
 from typing import Callable, Union
 
 from llama_index import GPTVectorStoreIndex
+from llama_index.data_structs.node_v2 import Node, DocumentRelationship
 from langchain import LLMChain
-from langchain.agents import (
-    load_tools,
-)
+from langchain.agents import load_tools
 from langchain.llms import BaseLLM
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -89,7 +88,9 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     if mode not in ("read", "write"):
         return 'Could not parse input. Please provide a valid "mode" value (either "read" or "write").'
     if mode == "read" and "question" not in input_json:
-        return 'Could not parse input. Please include the "question" value in your input.'
+        return (
+            'Could not parse input. Please include the "question" value in your input.'
+        )
     if mode == "read":
         return str(notebook_index.query(input_json["question"]))
     if mode == "write" and not all(key in input_json for key in ("topic", "content")):
