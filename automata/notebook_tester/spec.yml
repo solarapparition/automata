@@ -3,10 +3,10 @@ description: Tests functionality of the notebook.
 objective: My main objective is to test the functionality of my notebook.
 input_requirements:
   - related to testing notebook functionality
-input_validator_engine: gpt-3.5-turbo
+input_validator_engine: null
 imperatives: null
 instructions: null
 rank: 1
 engine: gpt-3.5-turbo
 role: bot
-sub_automata: [notebook, finalize]
+sub_automata: [notebook, finalize, think]
