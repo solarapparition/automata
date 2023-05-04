@@ -231,16 +231,31 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
 
 
 def main():
-    quiz_creator = load_automaton("quiz_creator", requester="user")
-    quiz_creator.run(
-        "Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`."
-        # "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
-    )
+    # automaton = load_automaton("auto_reflector", requester="user")
+    # automaton.run("Learn more about the Automata system, which you are a part of.")
+
+    automaton = load_automaton("quiz_creator", requester="human_tester")
+    automaton.run("Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`.")
+    # "Give me some instructions on washing windows."
+    # "What are the steps for building a computer?"
+    # "Delete all quizzes in your workspace."
+    # "Find an existing quiz in your workspace, load it, and figure out how many questions there is in it."
 
     # assistant = load_automaton("llm_assistant")
     # result = assistant.run(
     #     "generate a math quiz and save it to a file called `math_quiz.txt`."
     # )
+
+    # automaton = load_automaton("notebook", requester="human_tester")
+    # automaton.run('{"mode": "write", "topic": "test_1", "content": "test_1_content"}')
+    # print(result := automaton.run('{"mode": "write", "topic": "test_2", "content": "Texas is the Lone Star State."}'))
+    # print(result := automaton.run('{"mode": "write", "topic": "test_3", "content": "Chroma is an open source embeddings database."}'))
+    # print(result := automaton.run('{"mode": "read", "question": "What is Chroma??"}'))
+
+    # automaton = load_automaton("notebook_tester", requester="human_tester")
+    # print(result := automaton.run("write the following test note: 'chroma is an open source embeddings database.'"))
+    # print(result := automaton.run("find out from the notebook what Chroma is.'"))
+
     breakpoint()
 
 
