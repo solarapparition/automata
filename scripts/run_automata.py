@@ -75,7 +75,7 @@ def create_automaton_prompt(
     imperatives = role_info["imperatives"] + (self_imperatives or [])
     imperatives = "\n".join([f"- {imperative}" for imperative in imperatives]) or "N/A"
 
-    instructions = role_info["instructions"] + (self_instructions or [])
+    instructions = (self_instructions or []) + role_info["instructions"]
     instructions = "\n".join([f"- {instruction}" for instruction in instructions]) or "N/A"
 
     prefix = AUTOMATON_AFFIXES["prefix"].format(

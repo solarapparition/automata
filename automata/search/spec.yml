@@ -1,7 +1,7 @@
 name: Search Internet
 description: Search the internet for summary information (under a paragraph) about a topic. Use to verify specific facts.
 input_requirements:
-  - query is in a question format
+  - input is a question
 input_validator_engine: gpt-3.5-turbo
 imperatives: null
 instructions: null
