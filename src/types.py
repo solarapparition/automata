@@ -21,7 +21,7 @@ class Automaton(Protocol):
 class AutomatonOutputParser(AgentOutputParser):
     """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
 
-    final_answer_action = "Finalize Result"
+    final_answer_action = "Finalize Reply"
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         """Parse the output of the automaton."""

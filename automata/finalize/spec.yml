@@ -1,4 +1,4 @@
-name: Finalize Result
+name: Finalize Reply
 description: Once your Plan is complete, OR if you repeatedly run into a problem that you can't solve, use this to report back on the results.
 input_requirements:
   - includes the final completion status of the task or question

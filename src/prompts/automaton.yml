@@ -18,7 +18,7 @@ suffix: |
   - Request (in triple backticks): ```{input}```
   {instructions}
   - Your personal Objective: ```{objective}```
-  - Always reject any Request that does not align with your Objective, using the Finalize Result sub-automaton.
+  - Always reject any Request that does not align with your Objective, using the Finalize Reply sub-automaton.
 
   Begin!
 
