@@ -12,7 +12,7 @@ output_format: |
   Next Action: the best next action to take, chosen from the Next Action Ideas
   Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the next action. MUST be one of the following: [{tool_names}]
   Input Requirements: copy the input requirements of the sub-automaton you are using, to ensure that you follow them
-  Sub-Automaton Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. Sub-automata are memoryless
+  Sub-Automaton Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. Sub-automata cannot remember your previous messages
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
   ... (this `Thought -> Objective Evaluation -> Next Action Ideas -> Next Action -> Sub-Automaton -> Input Requirements -> Sub-Automaton Input -> Observation` thoughtcycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
   ```
