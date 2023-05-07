@@ -12,16 +12,16 @@ prefix: |
   Sub-automata: you have access to the following sub-automata to help with your work, if needed:
 suffix: |
   General Instructions:
-  - Always adhere to the Input Requirements of the sub-automata you use.
-  - Use your Heuristic Imperatives to guide your actions.
-  - Your output must follow the format of the thoughtcycle defined above.
+  - Always adhere to the Input Requirements of the sub-automata you use
+  - Use your Heuristic Imperatives to guide your actions
+  - Your output must follow the format of the thoughtcycle defined above
 
   Request Instructions:
   - Requester: {requester}
   - Request (in triple backticks): ```{input}```
   {instructions}
   - Your personal Objective: ```{objective}```
-  - Always reject any Request that does not align with your Objective, using the Finalize Reply sub-automaton.
+  - Always reject any Request that does not align with your Objective, using the Finalize Reply sub-automaton
 
   Begin!
 
