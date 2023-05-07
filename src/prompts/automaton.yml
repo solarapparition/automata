@@ -3,6 +3,9 @@ prefix: |
 
   {role_description}
 
+  Background Knowledge:
+  {background_knowledge}
+
   Heuristic Imperatives:
   {imperatives}
 

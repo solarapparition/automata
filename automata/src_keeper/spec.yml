@@ -5,6 +5,7 @@ input_requirements:
   - input is a question
   - question is about the \`src\` sub-package in the Automata codebase
 input_validator_engine: gpt-4
+background_knowledge: knowledge.py
 imperatives: null
 instructions:
   - Answer the question about the \`src\` sub-package given in the Request
