@@ -33,7 +33,10 @@ def extract_member_variables(item: Union[ast.Assign, ast.AnnAssign]) -> Dict[str
     return member_variables
 
 
-def extract_info(node: ast.AST, visited=None) -> Dict[str, Any]:
+PackageInfo = Dict[str, Union[str, Dict[str, "PackageInfo"]]]
+
+
+def extract_info(node: ast.AST, top_level_only: bool, visited=None) -> PackageInfo:
     """Extract info from a node."""
     if visited is None:
         visited = set()
@@ -45,22 +48,15 @@ def extract_info(node: ast.AST, visited=None) -> Dict[str, Any]:
 
     info = {"docstring_summary": get_docstring(node, summary=True)}
 
-    if isinstance(node, (ast.Module, ast.ClassDef)):
+    if not top_level_only and isinstance(node, (ast.Module, ast.ClassDef)):
         components = {}
         for item in node.body:
             if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                components[item.name] = extract_info(item, visited)
+                components[item.name] = extract_info(item, top_level_only, visited)
             elif isinstance(item, (ast.Assign, ast.AnnAssign)):
                 components.update(extract_member_variables(item))
         info["components"] = components
     return info
-
-
-def analyze_module(module_path: str) -> Dict[str, Any]:
-    """Analyze a single module and return its info."""
-    with open(module_path, "r", encoding="utf-8") as source:
-        tree = ast.parse(source.read())
-        return extract_info(tree)
 
 
 def is_init_py(file: str) -> bool:
@@ -79,43 +75,40 @@ def get_relative_module_name(package_path: str, file_path: str) -> str:
     return relative_path.replace(os.path.sep, ".").strip(".py")
 
 
-PackageInfo = Dict[str, Union[str, "PackageInfo"]]
+def analyze_module(module_path: str, top_level_only: bool = False) -> Dict[str, Any]:
+    """Analyze a single module and return its info."""
+    with open(module_path, "r", encoding="utf-8") as source:
+        tree = ast.parse(source.read())
+        return extract_info(tree, top_level_only)
 
 
 def analyze_package(package_path: str, top_level_only: bool = False) -> PackageInfo:
     """Analyze a package and return its info."""
-    package_dict = {}
+    root_path = package_path
 
-    for root, dirs, files in os.walk(package_path):
-        for file in files:
-            if file.endswith(".py"):
-                file_path = os.path.join(root, file)
-                module_name = get_relative_module_name(package_path, file_path)
+    def analyze_package_recursive(
+        package_path: str, top_level_only: bool = False, root_path: str = None
+    ) -> PackageInfo:
+        package_info = {"docstring_summary": "", "components": {}}
 
-                module_info = analyze_module(file_path)
+        for entry in os.scandir(package_path):
+            if entry.is_file() and entry.name.endswith(".py"):
+                file_path = entry.path
+                module_name = get_relative_module_name(root_path, file_path)
+                module_info = analyze_module(file_path, top_level_only)
+                if is_init_py(entry.name):
+                    package_info["docstring_summary"] = module_info["docstring_summary"]
+                else:
+                    package_info["components"][module_name] = module_info
+            elif entry.is_dir() and is_package_dir(entry.path) and top_level_only:
+                package_name = get_relative_module_name(root_path, entry.path)
+                package_info["components"][package_name] = analyze_package_recursive(
+                    entry.path, top_level_only, root_path
+                )
 
-                if top_level_only and not is_init_py(file):
-                    module_info = {
-                        "docstring_summary": module_info["docstring_summary"]
-                    }
-                elif top_level_only and is_init_py(file):
-                    if root == package_path:
-                        package_dict["docstring_summary"] = module_info[
-                            "docstring_summary"
-                        ]
-                    else:
-                        package_name = get_relative_module_name(package_path, root)
-                        package_dict[package_name] = {
-                            "docstring_summary": module_info["docstring_summary"]
-                        }
-                    continue
+        return package_info
 
-                package_dict[module_name] = module_info
-
-        if top_level_only:
-            dirs[:] = [d for d in dirs if is_package_dir(os.path.join(root, d))]
-
-    return package_dict
+    return analyze_package_recursive(package_path, top_level_only, root_path)
 
 
 def flatten_package_dict(package_info: Dict) -> Dict[str, str]:
@@ -156,21 +149,11 @@ def test_analyze_package_top_level_only():
         assert "components" not in result[module_name]
 
     # Check if the sub-package docstring summary is present
-    assert "sub_package" in result
-    assert "docstring_summary" in result["sub_package"]
+    assert "sub_package" in result["components"]
+    assert "docstring_summary" in result["components"]["sub_package"]
 
     pprint(result)
 
 
-def analyze_src(printout: bool=False) -> PackageInfo:
-    """Analyze the src directory and return its info."""
-    package_path = "src"
-    result = analyze_package(package_path, top_level_only=True)
-    if printout:
-        pprint(result)
-    return result
-
-
 if __name__ == "__main__":
     test_analyze_package_top_level_only()
-    # analyze_src()
