@@ -1,5 +1,5 @@
 name: Notebook
-description: Read from your notes, or write to it.
+description: Read from your previously written notes, or write to it. Use this to keep track of your important learnings.
 input_requirements:
   - 'allowed format 1: {{"mode": "read", "question": "<question>"}}: read your notes about a specific topic'
   - 'allowed format 2: {{"mode": "write", "topic": "<topic_name>", "content": "<content>"}}: write notes about a specific topic'
