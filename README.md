@@ -5,13 +5,17 @@ Automata is an attempt at a cognitive architecture that can compose actions from
 
 The core idea behind this architecture is that instead of having a complex central agent managing many commands and sub-agents, or a fixed set of agents with specific roles in a task loop, we modify Langchain agents to be able to call each other as tools, and then establish a hierarchical, rank-based structure to control the direction of the calls:
 ```
-Agent A (Rank 2):
-  - Agent B (Rank 1)
+Agent A (Rank 3):
+  - Agent B (Rank 2)
     - Tool 1
     - Tool 2
-  - Agent C (Rank 1)
+  - Agent C (Rank 2)
     - Tool 1
     - Tool 3
+    - Agent D (Rank 1)
+      - Tool 4
+      - Tool 5
+      - Tool 6
 ```
 Agent A can then potentially be included as a callable sub-agent by another agent of higher rank, and so on.
 
@@ -42,8 +46,8 @@ This will run the `Quiz Creator` automaton, which creates and saves a quiz to a 
 - Establish the core logical structure of each individual automaton.
 
 ### Medium Term:
-- Create a set of automata that can collectively performa a more complex learning task (such as figuring out the design principles of a code repository) than what simple agents are capable of right now.
-- Add ability to easily plug in external autonomous agents (e.g. AutoGPT, BabyAGI, etc.) in the form of an automaton, to leverage capabilities of other autonomous AI projects and not retread the same ground.
+- Create a set of automata that can collectively perform a more complex learning task (such as figuring out the design principles of a code repository) than what simple agents are capable of right now.
+- Add ability to easily plug in external autonomous agents (e.g. AutoGPT, BabyAGI, etc.) in the form of an automaton wrapper, to leverage capabilities of other autonomous AI projects and avoid retreading the same ground.
 
 ### Long Term:
 - Incorporate [@daveshap](https://github.com/daveshap/)'s Heuristic Imperatives into higher-ranked automata.
