@@ -28,10 +28,12 @@ from src.types import Automaton, AutomatonOutputParser
 from src.utilities.importing import quick_import
 
 
-def load_background_knowledge(automaton_path: Path, knowledge_info: str) -> str:
+def load_background_knowledge(
+    automaton_path: Path, knowledge_info: str, request: Union[str, None] = None
+) -> str:
     """Load the background knowledge for an automaton."""
     if knowledge_info.endswith(".py"):
-        return quick_import(automaton_path / knowledge_info).main()
+        return quick_import(automaton_path / knowledge_info).load(request=request)
     raise NotImplementedError
 
 
@@ -43,9 +45,6 @@ def load_automaton_data(file_name: str) -> Dict:
         (automaton_path / "spec.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
-    data["background_knowledge"] = load_background_knowledge(
-        automaton_path, data["background_knowledge"]
-    ) if "background_knowledge" in data else None
     return data
 
 
@@ -207,12 +206,22 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
+        background_knowledge = (
+            load_background_knowledge(
+                Path(f"automata/{file_name}"),
+                data["background_knowledge"],
+                request=args[0],
+            )
+            if "background_knowledge" in data
+            else None
+        )
+
         prompt = create_automaton_prompt(
             objective=data["objective"],
             self_instructions=data["instructions"],
             self_imperatives=data["imperatives"],
             role_info=get_role_info(data["role"]),
-            background_knowledge=data["background_knowledge"],
+            background_knowledge=background_knowledge,
             sub_automata=sub_automata,
             requester=requester,
         )
