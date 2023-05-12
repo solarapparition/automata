@@ -13,11 +13,11 @@ def format_summary(info_dict: dict, prefix: str = "") -> str:
     return "\n".join(summary_lines)
 
 
-def main() -> str:
+def load() -> str:
     """Analyze the src package and return a summary."""
     package_info = analyze_package("src", top_level_only=True)
     return f'You have background knowledge regarding the `src` package. The information is as follows:\nsrc: {package_info["docstring_summary"]}\n{format_summary(package_info)}'
 
 
 if __name__ == "__main__":
-    print(main())
+    print(load())
