@@ -160,6 +160,33 @@ def add_run_handling(
     return wrapper
 
 
+InputValidator = Callable[[str], Tuple[bool, str]]
+
+def load_input_validator(
+    validator_data: Union[Dict, None], requirements: List[str], file_name: str
+) -> Union[InputValidator, None]:
+    """Load the input validator based on data given."""
+    if validator_data is None:
+        return None
+    engine = validator_data["engine"]
+    logic = validator_data["logic"]
+    if not (engine and logic):
+        raise ValueError(
+            f"Must specify both `engine` and `logic` for input validator. Please check specs for `{file_name}`."
+        )
+
+    if logic == "default_llm_validator":
+        inspect_input = make_llm_function(
+            inspect_input_specs, model=create_engine(engine)
+        )
+        inspect_input = partial(
+            inspect_input, requirements=requirements
+        )
+        return partial(
+            validate_input, input_inspector=inspect_input, full_name=get_full_name(file_name)
+        )
+    raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
+
 @lru_cache(maxsize=None)
 def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
@@ -167,29 +194,17 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     data = load_automaton_data(file_name)
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
-    input_requirements = (
-        "\n".join([f"- {req}" for req in data["input_requirements"]])
-        if data["input_requirements"]
+    input_requirements = data["input_requirements"]
+    input_requirements_prompt = (
+        "\n".join([f"- {req}" for req in input_requirements])
+        if input_requirements
         else "None"
     )
     description_and_input = (
-        data["description"] + f" Input requirements:\n{input_requirements}"
+        data["description"] + f" Input requirements:\n{input_requirements_prompt}"
     )
 
-    # create input validation
-    validator_engine = data["input_validator_engine"]
-    if validator_engine:
-        inspect_input = make_llm_function(
-            inspect_input_specs, model=create_engine(validator_engine)
-        )
-        inspect_input = partial(inspect_input, requirements=data["input_requirements"])
-
-    input_validator = (
-        partial(validate_input, input_inspector=inspect_input, full_name=full_name)
-        if validator_engine
-        else None
-    )
-
+    input_validator = load_input_validator(data["input_validator"], input_requirements, file_name)
     engine = create_engine(engine)
 
     def load_and_run_function(*args, **kwargs) -> str:
