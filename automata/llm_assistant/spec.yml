@@ -3,7 +3,9 @@ description: A text generator that can help you create content. Cannot access lo
 input_requirements:
   - includes a descriptive request for the generated content.
   - does not reference interaction with local files, internet, or previous interactions
-input_validator_engine: gpt-4 # high intelligence to ensure that the input is valid
+input_validator:
+  engine: gpt-4
+  logic: default_llm_validator
 imperatives: null
 instructions: null
 rank: 0

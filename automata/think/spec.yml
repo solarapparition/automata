@@ -2,7 +2,7 @@ name: Think
 description: Think about your next steps. Use this when you need more time to analyze a complex or difficult situation.
 input_requirements:
   - topics for what you want to think about.
-input_validator_engine: null
+input_validator: null
 instructions: null
 imperatives: null
 rank: 0

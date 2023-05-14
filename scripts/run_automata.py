@@ -259,7 +259,10 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
 
 def demo():
     automaton = load_automaton("quiz_creator", requester="human_tester")
-    automaton.run("Create a math quiz suitable for a freshman college student, with 10 questions, then write it to a file called `math_quiz.txt`.")
+    automaton.run(
+        "Create a quiz with the following attributes: subject matter is mathematics, and difficult is freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
+    )
+
 
 
 

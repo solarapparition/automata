@@ -2,7 +2,9 @@ name: Load File
 description: Load a file from some location.
 input_requirements:
   - "a query of the form {{\"file_name\": <file_name>}}"
-input_validator_engine: gpt-3.5-turbo
+input_validator:
+  engine: gpt-3.5-turbo
+  logic: default_llm_validator
 imperatives: null
 instructions: null
 rank: 0

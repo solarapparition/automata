@@ -1,14 +1,16 @@
 name: Quiz Creator
 description: Can create quizzes for a particular subject.
-objective: To create or update quizzes.
 input_requirements:
   - must have the quiz's subject matter
   - has the difficulty of the questions
-input_validator_engine: null
+input_validator:
+  engine: gpt-4
+  logic: default_llm_validator
+objective: To create or update quizzes.
 imperatives: null
 instructions:
   - Create or update a quiz based on the information given in the Request.
 rank: 1
 engine: gpt-3.5-turbo
 role: worker
-sub_automata: [llm_assistant, human, think, save_text, view_workspace, load_file, finalize]
+sub_automata: [llm_assistant, think, save_text, view_workspace, load_file, finalize]
