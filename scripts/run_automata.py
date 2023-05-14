@@ -1,7 +1,7 @@
 """Run a specific automaton and its sub-automata."""
 
 from datetime import datetime
-from functools import lru_cache, partial
+from functools import lru_cache
 import functools
 import json
 from pathlib import Path
@@ -14,8 +14,6 @@ from langchain.agents import (
     Tool,
     AgentExecutor,
 )
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import BaseLLM
 import yaml
 
 sys.path.append("")
@@ -23,8 +21,7 @@ sys.path.append("")
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function
-from src.input_validation import validate_input, inspect_input as inspect_input_specs, load_input_validator
-from src.llm_function import make_llm_function
+from src.validation import load_input_validator
 from src.automaton import (
     Automaton,
     AutomatonOutputParser,
@@ -154,7 +151,9 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         data["description"] + f" Input requirements:\n{input_requirements_prompt}"
     )
 
-    input_validator = load_input_validator(data["input_validator"], input_requirements, file_name)
+    input_validator = load_input_validator(
+        data["input_validator"], input_requirements, file_name
+    )
     engine = create_engine(engine)
 
     def load_and_run_function(*args, **kwargs) -> str:
