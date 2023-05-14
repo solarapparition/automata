@@ -1,8 +1,13 @@
 """Functionality for validating input for automata."""
 
 import ast
+from functools import partial
 import json
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Union
+
+from src.automaton import get_full_name
+from src.engines import create_engine
+from src.llm_function import make_llm_function
 
 
 def inspect_input(input: str, requirements: List[str]) -> Dict[str, str]:
@@ -74,3 +79,30 @@ def validate_input(
         raise ValueError(
             f"Input inspector output does not have the correct format. Expected keys: {expected_output_keys}"
         ) from error
+
+
+InputValidator = Callable[[str], Tuple[bool, str]]
+
+
+def load_input_validator(
+    validator_data: Union[Dict, None], requirements: List[str], file_name: str
+) -> Union[InputValidator, None]:
+    """Load the input validator based on data given."""
+    if validator_data is None:
+        return None
+    engine = validator_data["engine"]
+    logic = validator_data["logic"]
+    if not (engine and logic):
+        raise ValueError(
+            f"Must specify both `engine` and `logic` for input validator. Please check specs for `{file_name}`."
+        )
+
+    if logic == "default_llm_validator":
+        input_inspector = make_llm_function(inspect_input, model=create_engine(engine))
+        input_inspector = partial(input_inspector, requirements=requirements)
+        return partial(
+            validate_input,
+            input_inspector=input_inspector,
+            full_name=get_full_name(file_name),
+        )
+    raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")

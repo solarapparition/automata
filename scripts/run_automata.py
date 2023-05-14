@@ -23,7 +23,7 @@ sys.path.append("")
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function
-from src.input_validation import validate_input, inspect_input as inspect_input_specs
+from src.input_validation import validate_input, inspect_input as inspect_input_specs, load_input_validator
 from src.llm_function import make_llm_function
 from src.automaton import (
     Automaton,
@@ -136,33 +136,6 @@ def add_run_handling(
 
     return wrapper
 
-
-InputValidator = Callable[[str], Tuple[bool, str]]
-
-def load_input_validator(
-    validator_data: Union[Dict, None], requirements: List[str], file_name: str
-) -> Union[InputValidator, None]:
-    """Load the input validator based on data given."""
-    if validator_data is None:
-        return None
-    engine = validator_data["engine"]
-    logic = validator_data["logic"]
-    if not (engine and logic):
-        raise ValueError(
-            f"Must specify both `engine` and `logic` for input validator. Please check specs for `{file_name}`."
-        )
-
-    if logic == "default_llm_validator":
-        inspect_input = make_llm_function(
-            inspect_input_specs, model=create_engine(engine)
-        )
-        inspect_input = partial(
-            inspect_input, requirements=requirements
-        )
-        return partial(
-            validate_input, input_inspector=inspect_input, full_name=get_full_name(file_name)
-        )
-    raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
 
 @lru_cache(maxsize=None)
 def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
