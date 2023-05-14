@@ -20,8 +20,9 @@ import yaml
 
 sys.path.append("")
 
-from src.function_loading import load_function
 from src.globals import AUTOMATON_AFFIXES
+from src.engines import create_engine
+from src.function_loading import load_function
 from src.input_validation import validate_input, inspect_input as inspect_input_specs
 from src.llm_function import make_llm_function
 from src.types import Automaton, AutomatonOutputParser
@@ -46,15 +47,6 @@ def load_automaton_data(file_name: str) -> Dict:
         Loader=yaml.FullLoader,
     )
     return data
-
-
-def create_engine(engine: str) -> BaseLLM:
-    """Create the model to use."""
-    if engine is None:
-        return None
-    if engine in ["gpt-3.5-turbo", "gpt-4"]:
-        return ChatOpenAI(temperature=0, model_name=engine)
-    raise ValueError(f"Engine {engine} not supported yet.")
 
 
 def get_role_info(role: str) -> Dict:
