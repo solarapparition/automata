@@ -25,7 +25,12 @@ from src.engines import create_engine
 from src.function_loading import load_function
 from src.input_validation import validate_input, inspect_input as inspect_input_specs
 from src.llm_function import make_llm_function
-from src.automaton import Automaton, AutomatonOutputParser
+from src.automaton import (
+    Automaton,
+    AutomatonOutputParser,
+    get_full_name,
+    load_automaton_data,
+)
 from src.utilities.importing import quick_import
 
 
@@ -38,32 +43,12 @@ def load_background_knowledge(
     raise NotImplementedError
 
 
-@lru_cache
-def load_automaton_data(file_name: str) -> Dict:
-    """Load an automaton from a YAML file."""
-    automaton_path = Path(f"automata/{file_name}")
-    data = yaml.load(
-        (automaton_path / "spec.yml").read_text(encoding="utf-8"),
-        Loader=yaml.FullLoader,
-    )
-    return data
-
-
 def get_role_info(role: str) -> Dict:
     """Get the role info for a given role."""
     return yaml.load(
         Path(f"src/prompts/roles/{role}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
-
-
-def get_full_name(file_name: str) -> str:
-    """Get the full name of an automaton."""
-    try:
-        data = load_automaton_data(file_name)
-    except FileNotFoundError:
-        return file_name
-    return f"{data['name']} ({data['role']} {data['rank']})"
 
 
 def create_automaton_prompt(

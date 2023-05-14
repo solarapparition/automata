@@ -1,10 +1,13 @@
 """Type definitions for automata."""
 
+from functools import lru_cache
+from pathlib import Path
 import re
-from typing import Callable, Protocol, Union
+from typing import Callable, Dict, Protocol, Union
 
 from langchain.agents import AgentOutputParser
 from langchain.schema import AgentAction, AgentFinish
+import yaml
 
 
 class Automaton(Protocol):
@@ -38,7 +41,25 @@ class AutomatonOutputParser(AgentOutputParser):
         action = match.group(1).strip()
         action_input = match.group(3)
         if self.final_answer_action in action:
-            return AgentFinish(
-                {"output": action_input}, text
-            )
+            return AgentFinish({"output": action_input}, text)
         return AgentAction(action, action_input.strip(" ").strip('"').strip("."), text)
+
+
+@lru_cache
+def load_automaton_data(file_name: str) -> Dict:
+    """Load an automaton from a YAML file."""
+    automaton_path = Path(f"automata/{file_name}")
+    data = yaml.load(
+        (automaton_path / "spec.yml").read_text(encoding="utf-8"),
+        Loader=yaml.FullLoader,
+    )
+    return data
+
+
+def get_full_name(file_name: str) -> str:
+    """Get the full name of an automaton."""
+    try:
+        data = load_automaton_data(file_name)
+    except FileNotFoundError:
+        return file_name
+    return f"{data['name']} ({data['role']} {data['rank']})"
