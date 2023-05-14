@@ -25,7 +25,7 @@ from src.engines import create_engine
 from src.function_loading import load_function
 from src.input_validation import validate_input, inspect_input as inspect_input_specs
 from src.llm_function import make_llm_function
-from src.types import Automaton, AutomatonOutputParser
+from src.automaton import Automaton, AutomatonOutputParser
 from src.utilities.importing import quick_import
 
 
