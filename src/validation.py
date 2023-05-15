@@ -3,11 +3,43 @@
 import ast
 from functools import partial
 import json
+import re
 from typing import Callable, Dict, List, Tuple, Union
+
+from langchain.agents import AgentOutputParser
+from langchain.schema import AgentAction, AgentFinish
 
 from src.automaton import get_full_name
 from src.engines import create_engine
 from src.llm_function import make_llm_function
+
+
+IOValidator = Callable[[str], Tuple[bool, str]]
+
+
+class AutomatonOutputParser(AgentOutputParser):
+    """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
+
+    # validator: Callable[[str], bool]
+    final_answer_action = "Finalize Reply"
+
+    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+        """Parse the output of the automaton."""
+
+        # \s matches against tab/newline/whitespace
+        action_regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        match = re.search(action_regex, text, re.DOTALL)
+        if not match:
+            return AgentAction(
+                "Think (function 0)",
+                "I must determine what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
+                text,
+            )
+        action = match.group(1).strip()
+        action_input = match.group(3)
+        if self.final_answer_action in action:
+            return AgentFinish({"output": action_input}, text)
+        return AgentAction(action, action_input.strip(" ").strip('"').strip("."), text)
 
 
 def inspect_input(input: str, requirements: List[str]) -> Dict[str, str]:
@@ -81,12 +113,9 @@ def validate_input(
         ) from error
 
 
-InputValidator = Callable[[str], Tuple[bool, str]]
-
-
 def load_input_validator(
     validator_data: Union[Dict, None], requirements: List[str], file_name: str
-) -> Union[InputValidator, None]:
+) -> Union[IOValidator, None]:
     """Load the input validator based on data given."""
     if validator_data is None:
         return None
