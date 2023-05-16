@@ -3,11 +3,7 @@ description: Think about your next steps. Use this when you need more time to an
 input_requirements:
   - topics for what you want to think about.
 input_validator: null
-output_validator: null
-instructions: null
-imperatives: null
 rank: 0
 engine: null
 role: worker
 runner: default_function_runner
-sub_automata: null
