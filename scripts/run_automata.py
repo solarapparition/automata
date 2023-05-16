@@ -21,7 +21,11 @@ sys.path.append("")
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function
-from src.validation import load_input_validator, load_output_validator, AutomatonOutputParser
+from src.validation import (
+    load_input_validator,
+    load_output_validator,
+    AutomatonOutputParser,
+)
 from src.automaton import (
     Automaton,
     get_full_name,
@@ -168,7 +172,9 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     # lazy load sub-automata until needed
     def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
-        output_validator: None = load_output_validator(data["output_validator"], request=request, file_name=file_name)
+        output_validator: None = load_output_validator(
+            data["output_validator"], request=request, file_name=file_name
+        )
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
@@ -207,9 +213,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         )
         return agent_executor.run(*args, **kwargs)
 
-    load_and_run = (
-        run_function if data["role"] == "function" else run_core_automaton
-    )
+    load_and_run = run_function if data["role"] == "function" else run_core_automaton
     automaton = Tool(
         full_name,
         add_run_handling(
