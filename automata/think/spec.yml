@@ -9,4 +9,5 @@ imperatives: null
 rank: 0
 engine: null
 role: function
+runner: default_function_runner
 sub_automata: null

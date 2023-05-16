@@ -213,11 +213,16 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         )
         return agent_executor.run(*args, **kwargs)
 
-    load_and_run = run_function if data["role"] == "function" else run_core_automaton
+    run_mapping = {
+        "default_function_runner": run_function,
+        "default_automaton_runner": run_core_automaton,
+    }
+    run = run_mapping[data["runner"]]
+
     automaton = Tool(
         full_name,
         add_run_handling(
-            load_and_run,
+            run,
             name=full_name,
             requester=requester,
             input_validator=input_validator,
