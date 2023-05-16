@@ -7,6 +7,7 @@ input_validator:
   engine: gpt-4
   logic: default_llm_validator
 objective: To create or update quizzes.
+output_validator: null
 imperatives: null
 instructions:
   - Create or update a quiz based on the information given in the Request.

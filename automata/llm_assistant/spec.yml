@@ -6,6 +6,7 @@ input_requirements:
 input_validator:
   engine: gpt-4
   logic: default_llm_validator
+output_validator: null
 imperatives: null
 instructions: null
 rank: 0

@@ -21,7 +21,7 @@ sys.path.append("")
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function
-from src.validation import load_input_validator, AutomatonOutputParser
+from src.validation import load_input_validator, load_output_validator, AutomatonOutputParser
 from src.automaton import (
     Automaton,
     AutomatonOutputParser,
@@ -167,6 +167,8 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
     def load_and_run_automaton(*args, **kwargs) -> str:
+        request = args[0]
+        output_validator: None = load_output_validator(data["output_validator"], request=request, file_name=file_name)
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
@@ -196,7 +198,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
             agent=ZeroShotAgent(
                 llm_chain=llm_chain,
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
-                output_parser=AutomatonOutputParser(),
+                output_parser=AutomatonOutputParser(validator=output_validator),
             ),
             tools=sub_automata,
             verbose=True,

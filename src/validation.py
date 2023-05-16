@@ -20,8 +20,8 @@ IOValidator = Callable[[str], Tuple[bool, str]]
 class AutomatonOutputParser(AgentOutputParser):
     """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
 
-    # validator: Callable[[str], bool]
     final_answer_action = "Finalize Reply"
+    validator: Union[IOValidator, None] = None
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         """Parse the output of the automaton."""
@@ -134,4 +134,28 @@ def load_input_validator(
             input_inspector=input_inspector,
             full_name=get_full_name(file_name),
         )
+    raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
+
+
+def load_output_validator(
+    validator_data: Union[Dict, None], request: str, file_name: str
+) -> Union[IOValidator, None]:
+    """Load the input validator based on data given."""
+    if validator_data is None:
+        return None
+    engine = validator_data["engine"]
+    logic = validator_data["logic"]
+    if not (engine and logic):
+        raise ValueError(
+            f"Must specify both `engine` and `logic` for output validator. Please check specs for `{file_name}`."
+        )
+
+    # if logic == "default_llm_validator":
+    #     input_inspector = make_llm_function(inspect_input, model=create_engine(engine))
+    #     input_inspector = partial(input_inspector, requirements=requirements)
+    #     return partial(
+    #         validate_input,
+    #         input_inspector=input_inspector,
+    #         full_name=get_full_name(file_name),
+    #     )
     raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
