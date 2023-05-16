@@ -156,7 +156,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     )
     engine = create_engine(engine)
 
-    def load_and_run_function(*args, **kwargs) -> str:
+    def run_function(*args, **kwargs) -> str:
         run = load_function(
             file_name,
             data,
@@ -166,7 +166,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         return run(*args, **kwargs)
 
     # wrap rest of loader inside a function to delay loading of sub-automata until needed
-    def load_and_run_automaton(*args, **kwargs) -> str:
+    def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
         output_validator: None = load_output_validator(data["output_validator"], request=request, file_name=file_name)
         sub_automata = [
@@ -208,7 +208,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         return agent_executor.run(*args, **kwargs)
 
     load_and_run = (
-        load_and_run_function if data["role"] == "function" else load_and_run_automaton
+        run_function if data["role"] == "function" else run_core_automaton
     )
     automaton = Tool(
         full_name,
