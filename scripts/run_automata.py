@@ -24,7 +24,6 @@ from src.function_loading import load_function
 from src.validation import load_input_validator, load_output_validator, AutomatonOutputParser
 from src.automaton import (
     Automaton,
-    AutomatonOutputParser,
     get_full_name,
     load_automaton_data,
 )
@@ -93,8 +92,9 @@ def create_automaton_prompt(
 
 def add_run_handling(
     run: Callable,
+    *,
     name: str,
-    input_validator: Union[Callable[[str], Tuple[bool, str]], None] = None,
+    input_validator: Union[Callable[[str], Tuple[bool, str]], None],
     requester: Union[str, None] = None,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
@@ -165,7 +165,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         )
         return run(*args, **kwargs)
 
-    # wrap rest of loader inside a function to delay loading of sub-automata until needed
+    # lazy load sub-automata until needed
     def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
         output_validator: None = load_output_validator(data["output_validator"], request=request, file_name=file_name)
