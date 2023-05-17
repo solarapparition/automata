@@ -3,13 +3,17 @@ description: Can create quizzes for a particular subject.
 input_requirements:
   - must have the quiz's subject matter
   - has the difficulty of the questions
+runner: default_automaton_runner
 input_validator:
   engine: gpt-4
   logic: default_llm_validator
+output_validator: null
 objective: To create or update quizzes.
 imperatives: null
 instructions:
   - Create or update a quiz based on the information given in the Request.
+knowledge: null
+recall: null
 rank: 1
 engine: gpt-3.5-turbo
 role: worker
