@@ -4,6 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict, Protocol
 
+from langchain.agents import AgentExecutor
 import yaml
 
 
@@ -16,6 +17,10 @@ class Automaton(Protocol):
     """Function that takes in a query and returns a response."""
     description: str
     """Description of the automaton. Viewable to requesters."""
+
+
+class AutomatonExecutor(AgentExecutor):
+    ...
 
 
 @lru_cache

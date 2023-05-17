@@ -12,7 +12,6 @@ from langchain import LLMChain, PromptTemplate
 from langchain.agents import (
     ZeroShotAgent,
     Tool,
-    AgentExecutor,
 )
 import yaml
 
@@ -28,6 +27,7 @@ from src.validation import (
 )
 from src.automaton import (
     Automaton,
+    AutomatonExecutor,
     get_full_name,
     load_automaton_data,
 )
@@ -200,7 +200,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
         llm_chain = LLMChain(llm=engine, prompt=prompt)
-        agent_executor = AgentExecutor.from_agent_and_tools(
+        agent_executor = AutomatonExecutor.from_agent_and_tools(
             agent=ZeroShotAgent(
                 llm_chain=llm_chain,
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
