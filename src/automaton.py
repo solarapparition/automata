@@ -25,6 +25,22 @@ class Automaton(Protocol):
     """Description of the automaton. Viewable to requesters."""
 
 
+class InvalidSubAutomaton(BaseTool):
+    """Exception raised when a sub-automaton is invalid."""
+
+    sub_automata_allowed: List[str] = []
+    name = "Invalid Sub-Automaton"
+    description = "Called when sub-automaton name is invalid."
+
+    def _run(self, tool_input: str) -> str:
+        """Use the tool."""
+        return f"{tool_input} is not a valid Sub-Automaton, try another one from the Sub-Automata list: {self.sub_automata_allowed}"
+
+    async def _arun(self, tool_input: str) -> str:
+        """Use the tool."""
+        return self._run(tool_input)
+
+
 class AutomatonExecutor(AgentExecutor):
     def _take_next_step(
         self,
@@ -69,10 +85,12 @@ class AutomatonExecutor(AgentExecutor):
                 )
             else:
                 tool_run_kwargs = self.agent.tool_run_logging_kwargs()
-                observation = InvalidTool().run(
+                observation = InvalidSubAutomaton(
+                    sub_automata_allowed=name_to_tool_map.keys()
+                ).run(
                     agent_action.tool,
                     verbose=self.verbose,
-                    color=None,
+                    color="red",
                     **tool_run_kwargs,
                 )
             result.append((agent_action, observation))
