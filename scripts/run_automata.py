@@ -34,6 +34,11 @@ from src.automaton import (
 from src.utilities.importing import quick_import
 
 
+def load_recall(automaton_path: Path, recall_info: str) -> Callable[[str], str]:
+    """Load the recall function for an automaton."""
+    return None
+
+
 def load_background_knowledge(
     automaton_path: Path, knowledge_info: str, request: Union[str, None] = None
 ) -> str:
@@ -175,6 +180,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         output_validator: None = load_output_validator(
             data["output_validator"], request=request, file_name=file_name
         )
+        recall: Union[Callable, None] = load_recall(Path(f"automata/{file_name}"), data["recall"])
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
