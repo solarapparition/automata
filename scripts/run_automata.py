@@ -24,6 +24,7 @@ from src.validation import (
     load_input_validator,
     load_output_validator,
     AutomatonOutputParser,
+    IOValidator,
 )
 from src.automaton import (
     Automaton,
@@ -177,7 +178,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     # lazy load sub-automata until needed
     def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
-        output_validator: None = load_output_validator(
+        output_validator: Union[IOValidator, None] = load_output_validator(
             data["output_validator"], request=request, file_name=file_name
         )
         recall: Union[Callable, None] = load_recall(Path(f"automata/{file_name}"), data["recall"])
