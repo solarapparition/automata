@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Callable, Dict, Protocol, List, Tuple, Union
 
 from langchain.agents import AgentExecutor, ZeroShotAgent
-from langchain.agents.tools import InvalidTool
 from langchain.schema import (
     AgentAction,
     AgentFinish,
