@@ -44,6 +44,24 @@ class InvalidSubAutomaton(BaseTool):
 class AutomatonAgent(ZeroShotAgent):
     """Agent for automata."""
 
+    reflect: Union[Callable[[str], str], None]
+    """Recalls information relevant to the current step."""
+
+    def _construct_scratchpad(self, intermediate_steps: List[Tuple[AgentAction, str]]) -> str:
+        """Construct the scratchpad that lets the agent continue its thought process."""
+
+        thoughts = ""
+        for action, observation in intermediate_steps:
+            thoughts += action.log
+            thoughts += f"\n{self.observation_prefix}{observation}"
+            thoughts += f"\n\n---Thoughtcycle---\n\n{self.llm_prefix}"
+
+        reflections = self.reflect(intermediate_steps) if self.reflect else None
+        reflections = f"Reflection:\n{reflections}"
+        thoughts = thoughts.replace(self.llm_prefix, f"{reflections}\n\n{self.llm_prefix}")
+        return thoughts
+
+
 class AutomatonExecutor(AgentExecutor):
     """Executor for automata."""
 
