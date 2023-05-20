@@ -246,14 +246,14 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
 def demo():
     automaton = load_automaton("quiz_creator", requester="human_tester")
     automaton.run(
-        "Create a quiz with the following attributes: subject matter is mathematics, and difficult is freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
+        "Create a quiz having the subject matter of mathematics, and a difficulty of freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
     )
 
 
 def test():
     automaton = load_automaton("quiz_creator", requester="human_tester")
     result = automaton.run(
-        "Create a quiz with the following attributes: subject matter is mathematics, and difficult is freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
+        "Create a quiz having the subject matter of mathematics, and a difficulty of freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
     )
 
     # automaton = load_automaton("auto_reflector", requester="user")
