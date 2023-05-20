@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict, Protocol, List, Tuple, Union
 
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, ZeroShotAgent
 from langchain.agents.tools import InvalidTool
 from langchain.schema import (
     AgentAction,
@@ -41,7 +41,12 @@ class InvalidSubAutomaton(BaseTool):
         return self._run(tool_input)
 
 
+class AutomatonAgent(ZeroShotAgent):
+    """Agent for automata."""
+
 class AutomatonExecutor(AgentExecutor):
+    """Executor for automata."""
+
     def _take_next_step(
         self,
         name_to_tool_map: Dict[str, BaseTool],

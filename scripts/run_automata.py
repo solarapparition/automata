@@ -28,6 +28,7 @@ from src.validation import (
 )
 from src.automaton import (
     Automaton,
+    AutomatonAgent,
     AutomatonExecutor,
     get_full_name,
     load_automaton_data,
@@ -90,7 +91,7 @@ def create_automaton_prompt(
         .replace("{objective}", objective)
         .replace("{requester}", get_full_name(requester))
     )
-    prompt = ZeroShotAgent.create_prompt(
+    prompt = AutomatonAgent.create_prompt(
         sub_automata,
         prefix=prefix,
         suffix=suffix,
@@ -208,7 +209,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         # breakpoint()
         llm_chain = LLMChain(llm=engine, prompt=prompt)
         agent_executor = AutomatonExecutor.from_agent_and_tools(
-            agent=ZeroShotAgent(
+            agent=AutomatonAgent(
                 llm_chain=llm_chain,
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
                 output_parser=AutomatonOutputParser(validator=output_validator),
