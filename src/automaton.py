@@ -16,6 +16,7 @@ from typing import (
 )
 
 from langchain.agents import AgentExecutor, AgentOutputParser, ZeroShotAgent
+from langchain.input import print_text
 from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 import yaml
@@ -121,8 +122,9 @@ class AutomatonAgent(ZeroShotAgent):
             Action specifying what tool to use.
         """
 
-        full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
         reflection = self.reflect(intermediate_steps) if self.reflect else None
+        print_text(f"\nReflection:\n{reflection}", color="yellow", end="\n\n")
+        full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
         full_inputs[
             "agent_scratchpad"
         ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{self.llm_prefix}'
