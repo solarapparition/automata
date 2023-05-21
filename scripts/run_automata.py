@@ -210,11 +210,12 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
         llm_chain = LLMChain(llm=engine, prompt=prompt)
+        output_parser = AutomatonOutputParser(validator=output_validator)
         agent_executor = AutomatonExecutor.from_agent_and_tools(
             agent=AutomatonAgent(
                 llm_chain=llm_chain,
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
-                output_parser=AutomatonOutputParser(validator=output_validator),
+                output_parser=output_parser,
                 reflect=reflect,
             ),
             tools=sub_automata,
