@@ -2,12 +2,25 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Callable, Dict, NamedTuple, Protocol, List, Tuple, Union
+import re
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    NamedTuple,
+    Optional,
+    Protocol,
+    List,
+    Tuple,
+    Union,
+)
 
-from langchain.agents import AgentExecutor, ZeroShotAgent
+from langchain.agents import AgentExecutor, AgentOutputParser, ZeroShotAgent
 from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 import yaml
+
+from src.validation import IOValidator
 
 
 class Automaton(Protocol):
@@ -28,6 +41,36 @@ class AutomatonAction(NamedTuple):
     tool_input: str
     log: str
     reflection: Union[str, None]
+
+
+class AutomatonOutputParser(AgentOutputParser):
+    """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
+
+    final_answer_action = "Finalize Reply"
+    validator: Union[IOValidator, None] = None
+
+    def parse(
+        self, text: str, reflection: Optional[str] = None
+    ) -> Union[AutomatonAction, AgentFinish]:
+        """Parse the output of the automaton."""
+
+        # \s matches against tab/newline/whitespace
+        action_regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        match = re.search(action_regex, text, re.DOTALL)
+        if not match:
+            return AutomatonAction(
+                "Think (function 0)",
+                "I must determine what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
+                text,
+                reflection,
+            )
+        action = match.group(1).strip()
+        action_input = match.group(3)
+        if self.final_answer_action in action:
+            return AgentFinish({"output": action_input}, text)
+        return AutomatonAction(
+            action, action_input.strip(" ").strip('"').strip("."), text, reflection
+        )
 
 
 class InvalidSubAutomaton(BaseTool):
