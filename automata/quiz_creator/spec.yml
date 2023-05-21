@@ -11,7 +11,7 @@ imperatives: null
 instructions:
   - Create or update a quiz based on the information given in the Request.
 knowledge: null
-recall: null
+reflect: null
 rank: 1
 engine: gpt-3.5-turbo
 role: worker

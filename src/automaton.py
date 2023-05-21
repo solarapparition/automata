@@ -93,7 +93,7 @@ class AutomatonAgent(ZeroShotAgent):
     """Agent for automata."""
 
     reflect: Union[Callable[[Any], str], None]
-    """Recalls information relevant to the current step."""
+    """Reflect on information relevant to the current step."""
 
     def _construct_scratchpad(
         self, intermediate_steps: List[Tuple[AutomatonAction, str]]
