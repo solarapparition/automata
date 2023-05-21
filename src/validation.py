@@ -4,7 +4,7 @@ import ast
 from functools import partial
 import json
 import re
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from langchain.agents import AgentOutputParser
 from langchain.schema import AgentFinish
@@ -36,6 +36,7 @@ class AutomatonOutputParser(AgentOutputParser):
                 "Think (function 0)",
                 "I must determine what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
                 text,
+                reflection,
             )
         action = match.group(1).strip()
         action_input = match.group(3)

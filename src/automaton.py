@@ -2,13 +2,10 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Dict, Protocol, List, Tuple, Union
+from typing import Any, Callable, Dict, NamedTuple, Protocol, List, Tuple, Union
 
 from langchain.agents import AgentExecutor, ZeroShotAgent
-from langchain.schema import (
-    AgentAction,
-    AgentFinish,
-)
+from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 import yaml
 
@@ -52,7 +49,7 @@ class InvalidSubAutomaton(BaseTool):
 class AutomatonAgent(ZeroShotAgent):
     """Agent for automata."""
 
-    reflect: Union[Callable[[str], str], None]
+    reflect: Union[Callable[[Any], str], None]
     """Recalls information relevant to the current step."""
 
     def _construct_scratchpad(
@@ -62,14 +59,32 @@ class AutomatonAgent(ZeroShotAgent):
 
         thoughts = ""
         for action, observation in intermediate_steps:
-            thoughts += action.log
+            thoughts += f"\n{action.reflection}\n\n{self.llm_prefix}\n{action.log}"
             thoughts += f"\n{self.observation_prefix}{observation}"
-            thoughts += f"\n\n---Thoughtcycle---\n\n{self.llm_prefix}"
-
-        reflections = self.reflect(intermediate_steps) if self.reflect else None
-        reflections = f"Reflection:\n{reflections}"
-        thoughts = thoughts.replace(self.llm_prefix, f"{reflections}\n\n{self.llm_prefix}")
+            thoughts += "\n\n---Thoughtcycle---\n\nReflection:"
         return thoughts
+
+    def plan(
+        self, intermediate_steps: List[Tuple[AutomatonAction, str]], **kwargs: Any
+    ) -> Union[AutomatonAction, AgentFinish]:
+        """Given input, decided what to do.
+
+        Args:
+            intermediate_steps: Steps the LLM has taken to date,
+                along with observations
+            **kwargs: User inputs.
+
+        Returns:
+            Action specifying what tool to use.
+        """
+
+        full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
+        reflection = self.reflect(intermediate_steps) if self.reflect else None
+        full_inputs[
+            "agent_scratchpad"
+        ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{self.llm_prefix}'
+        full_output = self.llm_chain.predict(**full_inputs)
+        return self.output_parser.parse(full_output, reflection=reflection)
 
 
 class AutomatonExecutor(AgentExecutor):
@@ -80,8 +95,8 @@ class AutomatonExecutor(AgentExecutor):
         name_to_tool_map: Dict[str, BaseTool],
         color_mapping: Dict[str, str],
         inputs: Dict[str, str],
-        intermediate_steps: List[Tuple[AgentAction, str]],
-    ) -> Union[AgentFinish, List[Tuple[AgentAction, str]]]:
+        intermediate_steps: List[Tuple[AutomatonAction, str]],
+    ) -> Union[AgentFinish, List[Tuple[AutomatonAction, str]]]:
         """Take a single step in the thought-action-observation loop.
 
         Override this to take control of how the agent makes and acts on choices.
