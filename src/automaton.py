@@ -24,6 +24,15 @@ class Automaton(Protocol):
     """Description of the automaton. Viewable to requesters."""
 
 
+class AutomatonAction(NamedTuple):
+    """An action for an automaton."""
+
+    tool: str
+    tool_input: str
+    log: str
+    reflection: Union[str, None]
+
+
 class InvalidSubAutomaton(BaseTool):
     """Exception raised when a sub-automaton is invalid."""
 
@@ -46,7 +55,9 @@ class AutomatonAgent(ZeroShotAgent):
     reflect: Union[Callable[[str], str], None]
     """Recalls information relevant to the current step."""
 
-    def _construct_scratchpad(self, intermediate_steps: List[Tuple[AgentAction, str]]) -> str:
+    def _construct_scratchpad(
+        self, intermediate_steps: List[Tuple[AutomatonAction, str]]
+    ) -> str:
         """Construct the scratchpad that lets the agent continue its thought process."""
 
         thoughts = ""
@@ -80,8 +91,8 @@ class AutomatonExecutor(AgentExecutor):
         # If the tool chosen is the finishing tool, then we end and return.
         if isinstance(output, AgentFinish):
             return output
-        actions: List[AgentAction]
-        if isinstance(output, AgentAction):
+        actions: List[AutomatonAction]
+        if isinstance(output, AutomatonAction):
             actions = [output]
         else:
             actions = output

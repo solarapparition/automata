@@ -7,9 +7,9 @@ import re
 from typing import Callable, Dict, List, Tuple, Union
 
 from langchain.agents import AgentOutputParser
-from langchain.schema import AgentAction, AgentFinish
+from langchain.schema import AgentFinish
 
-from src.automaton import get_full_name
+from src.automaton import get_full_name, AutomatonAction
 from src.engines import create_engine
 from src.llm_function import make_llm_function
 
@@ -23,14 +23,16 @@ class AutomatonOutputParser(AgentOutputParser):
     final_answer_action = "Finalize Reply"
     validator: Union[IOValidator, None] = None
 
-    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
+    def parse(
+        self, text: str, reflection: Optional[str] = None
+    ) -> Union[AutomatonAction, AgentFinish]:
         """Parse the output of the automaton."""
 
         # \s matches against tab/newline/whitespace
         action_regex = r"Sub-Automaton\s*\d*\s*:(.*?)\nInput\s*\d*\s*Requirements\s*\d*\s*:(.*?)\nSub-Automaton\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
         match = re.search(action_regex, text, re.DOTALL)
         if not match:
-            return AgentAction(
+            return AutomatonAction(
                 "Think (function 0)",
                 "I must determine what Sub-Automaton to delegate to, what its Input Requirements are, and what Sub-Automaton Input to send.",
                 text,
@@ -39,7 +41,9 @@ class AutomatonOutputParser(AgentOutputParser):
         action_input = match.group(3)
         if self.final_answer_action in action:
             return AgentFinish({"output": action_input}, text)
-        return AgentAction(action, action_input.strip(" ").strip('"').strip("."), text)
+        return AutomatonAction(
+            action, action_input.strip(" ").strip('"').strip("."), text, reflection
+        )
 
 
 def inspect_input(input: str, requirements: List[str]) -> Dict[str, str]:
