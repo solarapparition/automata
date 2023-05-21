@@ -25,4 +25,6 @@ suffix: |
 
   Begin!
 
-  Thought:{agent_scratchpad}
+  ---Thoughtcycle---
+
+  Reflection:{agent_scratchpad}
