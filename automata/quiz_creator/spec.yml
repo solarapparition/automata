@@ -4,9 +4,7 @@ input_requirements:
   - must have the quiz's subject matter
   - has the difficulty of the questions
 runner: default_automaton_runner
-input_validator:
-  engine: gpt-4
-  logic: default_llm_validator
+input_validator: null
 output_validator: null
 objective: To create or update quizzes.
 imperatives: null
