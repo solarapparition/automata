@@ -9,10 +9,7 @@ import sys
 from typing import Callable, Dict, List, Tuple, Union
 
 from langchain import LLMChain, PromptTemplate
-from langchain.agents import (
-    ZeroShotAgent,
-    Tool,
-)
+from langchain.agents import Tool
 import yaml
 
 sys.path.append("")
@@ -23,13 +20,15 @@ from src.function_loading import load_function
 from src.validation import (
     load_input_validator,
     load_output_validator,
-    AutomatonOutputParser,
     IOValidator,
 )
 from src.automaton import (
     Automaton,
     AutomatonAgent,
     AutomatonExecutor,
+    AutomatonOutputParser,
+)
+from src.loaders import (
     get_full_name,
     load_automaton_data,
 )
@@ -37,7 +36,7 @@ from src.utilities.importing import quick_import
 
 
 def load_reflect(automaton_path: Path, reflect_info: str) -> Callable[[str], str]:
-    """Load the recall function for an automaton."""
+    """Load the reflection function for an automaton."""
     return None
 
 
@@ -183,7 +182,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
             data["output_validator"], request=request, file_name=file_name
         )
         reflect: Union[Callable, None] = load_reflect(
-            Path(f"automata/{file_name}"), data["recall"]
+            Path(f"automata/{file_name}"), data["reflect"]
         )
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]

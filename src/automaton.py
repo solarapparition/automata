@@ -1,7 +1,5 @@
 """Type definitions for automata."""
 
-from functools import lru_cache
-from pathlib import Path
 import re
 from typing import (
     Any,
@@ -19,7 +17,6 @@ from langchain.agents import AgentExecutor, AgentOutputParser, ZeroShotAgent
 from langchain.input import print_text
 from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
-import yaml
 
 from src.validation import IOValidator
 
