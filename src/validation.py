@@ -5,7 +5,7 @@ from functools import partial
 import json
 from typing import Callable, Dict, List, Tuple, Union
 
-from src.automaton import get_full_name
+from src.loaders import get_full_name
 from src.engines import create_engine
 from src.llm_function import make_llm_function
 
