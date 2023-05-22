@@ -87,11 +87,21 @@ class InvalidSubAutomaton(BaseTool):
         return self._run(tool_input)
 
 
+class Planner(Protocol):
+    """Planner for automata."""
+
+    def __call__(self, intermediate_steps: List[Tuple[AutomatonAction, str]]) -> str:
+        """Plan the next step."""
+
+
 class AutomatonAgent(ZeroShotAgent):
     """Agent for automata."""
 
     reflect: Union[Callable[[Any], str], None]
     """Reflect on information relevant to the current step."""
+
+    planner: Planner = default_planner
+    """Plan the next step."""
 
     def _construct_scratchpad(
         self, intermediate_steps: List[Tuple[AutomatonAction, str]]
@@ -119,13 +129,19 @@ class AutomatonAgent(ZeroShotAgent):
             Action specifying what tool to use.
         """
 
-        reflection = self.reflect(intermediate_steps) if self.reflect else None
+        reflection = self.reflect(intermediate_steps, **kwargs) if self.reflect else None
         print_text(f"\nReflection:\n{reflection}", color="yellow", end="\n\n")
-        full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
-        full_inputs[
-            "agent_scratchpad"
-        ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{self.llm_prefix}'
-        full_output = self.llm_chain.predict(**full_inputs)
+
+        breakpoint()
+
+        # full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
+        # full_inputs[
+        #     "agent_scratchpad"
+        # ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{self.llm_prefix}'
+        # full_output = self.llm_chain.predict(**full_inputs)
+
+        full_output = self.planner(self, intermediate_steps, **kwargs)
+        breakpoint()
         return self.output_parser.parse(full_output, reflection=reflection)
 
 
