@@ -9,11 +9,13 @@ import sys
 from typing import Callable, Dict, List, Tuple, Union
 
 from langchain import LLMChain, PromptTemplate
-from langchain.agents import Tool
+from langchain.agents import Agent, Tool
 import yaml
 
 sys.path.append("")
 
+
+from src.automaton import AutomatonAction
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function
@@ -144,6 +146,21 @@ def add_run_handling(
     return wrapper
 
 
+def default_zero_shot_planner(
+    agent: Agent,
+    intermediate_steps: List[Tuple[AutomatonAction, str]],
+    reflection: Union[str, None],
+    **kwargs,
+) -> str:
+    """Default planner for automata."""
+    full_inputs = agent.get_full_inputs(intermediate_steps, **kwargs)
+    full_inputs[
+        "agent_scratchpad"
+    ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{agent.llm_prefix}'
+    full_output = agent.llm_chain.predict(**full_inputs)
+    return full_output
+
+
 @lru_cache(maxsize=None)
 def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
@@ -151,6 +168,8 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     data = load_automaton_data(file_name)
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
+    engine = create_engine(engine)
+
     input_requirements = data["input_requirements"]
     input_requirements_prompt = (
         "\n".join([f"- {req}" for req in input_requirements])
@@ -164,7 +183,6 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
     input_validator = load_input_validator(
         data["input_validator"], input_requirements, file_name
     )
-    engine = create_engine(engine)
 
     def run_function(*args, **kwargs) -> str:
         run = load_function(
@@ -216,6 +234,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
                 output_parser=output_parser,
                 reflect=reflect,
+                planner=default_zero_shot_planner,
             ),
             tools=sub_automata,
             verbose=True,

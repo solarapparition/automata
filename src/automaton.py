@@ -12,11 +12,13 @@ from typing import (
     Tuple,
     Union,
 )
+from typing_extensions import runtime_checkable
 
-from langchain.agents import AgentExecutor, AgentOutputParser, ZeroShotAgent
+from langchain.agents import Agent, AgentExecutor, AgentOutputParser, ZeroShotAgent
 from langchain.input import print_text
 from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
+from pydantic import validator
 
 from src.validation import IOValidator
 
@@ -87,10 +89,17 @@ class InvalidSubAutomaton(BaseTool):
         return self._run(tool_input)
 
 
+@runtime_checkable
 class Planner(Protocol):
     """Planner for automata."""
 
-    def __call__(self, intermediate_steps: List[Tuple[AutomatonAction, str]]) -> str:
+    def __call__(
+        self,
+        automaton_agent: Agent,
+        intermediate_steps: List[Tuple[AutomatonAction, str]],
+        reflection: Union[str, None],
+        **kwargs,
+    ) -> str:
         """Plan the next step."""
 
 
@@ -100,8 +109,20 @@ class AutomatonAgent(ZeroShotAgent):
     reflect: Union[Callable[[Any], str], None]
     """Reflect on information relevant to the current step."""
 
-    planner: Planner = default_planner
+    planner: Planner
     """Plan the next step."""
+
+    class Config:
+        """Pydantic configuration."""
+
+        arbitrary_types_allowed = True
+
+    @validator("planner")
+    def check_planner(cls, value):  # pylint: disable=no-self-argument
+        """Check that the planner implements the `Planner` protocol."""
+        if not isinstance(value, Planner):
+            raise ValueError("`planner` must implement the `Planner` protocol.")
+        return value
 
     def _construct_scratchpad(
         self, intermediate_steps: List[Tuple[AutomatonAction, str]]
@@ -129,19 +150,11 @@ class AutomatonAgent(ZeroShotAgent):
             Action specifying what tool to use.
         """
 
-        reflection = self.reflect(intermediate_steps, **kwargs) if self.reflect else None
+        reflection = (
+            self.reflect(intermediate_steps, **kwargs) if self.reflect else None
+        )
         print_text(f"\nReflection:\n{reflection}", color="yellow", end="\n\n")
-
-        breakpoint()
-
-        # full_inputs = self.get_full_inputs(intermediate_steps, **kwargs)
-        # full_inputs[
-        #     "agent_scratchpad"
-        # ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{self.llm_prefix}'
-        # full_output = self.llm_chain.predict(**full_inputs)
-
-        full_output = self.planner(self, intermediate_steps, **kwargs)
-        breakpoint()
+        full_output = self.planner(self, intermediate_steps, reflection, **kwargs)
         return self.output_parser.parse(full_output, reflection=reflection)
 
 
@@ -201,4 +214,3 @@ class AutomatonExecutor(AgentExecutor):
                 )
             result.append((agent_action, observation))
         return result
-

@@ -13,9 +13,8 @@ instructions:
 knowledge: null
 reflect: null
 rank: 1
-reasoning:
-  engine: gpt-3.5-turbo
-  planner: default_zero_shot_planner
+engine: gpt-3.5-turbo
+reasoning: default_zero_shot_planner
 role: worker
 sub_automata:
   - llm_assistant
