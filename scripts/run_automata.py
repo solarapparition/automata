@@ -34,6 +34,7 @@ from src.loaders import (
     get_full_name,
     load_automaton_data,
 )
+from src.planners import load_planner
 from src.utilities.importing import quick_import
 
 
@@ -146,26 +147,12 @@ def add_run_handling(
     return wrapper
 
 
-def default_zero_shot_planner(
-    agent: Agent,
-    intermediate_steps: List[Tuple[AutomatonAction, str]],
-    reflection: Union[str, None],
-    **kwargs,
-) -> str:
-    """Default planner for automata."""
-    full_inputs = agent.get_full_inputs(intermediate_steps, **kwargs)
-    full_inputs[
-        "agent_scratchpad"
-    ] = f'{full_inputs["agent_scratchpad"]}\n{reflection}\n\n{agent.llm_prefix}'
-    full_output = agent.llm_chain.predict(**full_inputs)
-    return full_output
-
-
 @lru_cache(maxsize=None)
 def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = load_automaton_data(file_name)
+    automaton_location = Path(f"automata/{file_name}")
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     engine = create_engine(engine)
@@ -202,12 +189,13 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
         reflect: Union[Callable, None] = load_reflect(
             Path(f"automata/{file_name}"), data["reflect"]
         )
+        planner = load_planner(automaton_location, data["planner"])
         sub_automata = [
             load_automaton(name, requester=file_name) for name in data["sub_automata"]
         ]
         background_knowledge = (
             load_background_knowledge(
-                Path(f"automata/{file_name}"),
+                automaton_location,
                 data["background_knowledge"],
                 request=args[0],
             )
@@ -234,7 +222,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
                 output_parser=output_parser,
                 reflect=reflect,
-                planner=default_zero_shot_planner,
+                planner=planner,
             ),
             tools=sub_automata,
             verbose=True,
