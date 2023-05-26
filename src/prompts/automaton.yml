@@ -1,6 +1,5 @@
 prefix: |
-  You are an "automaton", an entity capable of advancing your objective in a predefined way, depending on your role.
-
+  You are an "automaton", an AI agent capable of advancing your objective in a predefined way, depending on your role.
   {role_description}
 
   Background Knowledge:
