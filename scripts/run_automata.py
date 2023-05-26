@@ -9,13 +9,11 @@ import sys
 from typing import Callable, Dict, List, Tuple, Union
 
 from langchain import LLMChain, PromptTemplate
-from langchain.agents import Agent, Tool
+from langchain.agents import Tool
 import yaml
 
 sys.path.append("")
 
-
-from src.automaton import AutomatonAction
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
 from src.function_loading import load_function

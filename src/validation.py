@@ -121,12 +121,4 @@ def load_output_validator(
             f"Must specify both `engine` and `logic` for output validator. Please check specs for `{file_name}`."
         )
 
-    # if logic == "default_llm_validator":
-    #     input_inspector = make_llm_function(inspect_input, model=create_engine(engine))
-    #     input_inspector = partial(input_inspector, requirements=requirements)
-    #     return partial(
-    #         validate_input,
-    #         input_inspector=input_inspector,
-    #         full_name=get_full_name(file_name),
-    #     )
     raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
