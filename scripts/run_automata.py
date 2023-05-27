@@ -106,7 +106,8 @@ def add_run_handling(
     *,
     name: str,
     input_validator: Union[Callable[[str], Tuple[bool, str]], None],
-    requester: Union[str, None] = None,
+    requester: str,
+    requester_session_id: str,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
     preprint = f"\n\n---{name}: Start---"
@@ -134,10 +135,9 @@ def add_run_handling(
             "result": result,
             "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
-
-        with open(
-            Path(f"automata/{requester}/event_log.jsonl"), "a", encoding="utf-8"
-        ) as file:
+        log_path = Path(f"automata/{requester}/event_log/{requester_session_id}.jsonl")
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(log_path, "a", encoding="utf-8") as file:
             file.write(json.dumps(event) + "\n")
 
         return result
@@ -146,7 +146,9 @@ def add_run_handling(
 
 
 @lru_cache(maxsize=None)
-def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automaton:
+def load_automaton(
+    file_name: str, requester_session_id: str, requester: str
+) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = load_automaton_data(file_name)
@@ -188,8 +190,12 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
             Path(f"automata/{file_name}"), data["reflect"]
         )
         planner = load_planner(automaton_location, data["planner"])
+        self_session_id = generate_timestamp_id()
         sub_automata = [
-            load_automaton(name, requester=file_name) for name in data["sub_automata"]
+            load_automaton(
+                name, requester_session_id=self_session_id, requester=file_name
+            )
+            for name in data["sub_automata"]
         ]
         background_knowledge = (
             load_background_knowledge(
@@ -242,6 +248,7 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
             name=full_name,
             requester=requester,
             input_validator=input_validator,
+            requester_session_id=requester_session_id,
         ),
         description_and_input,
     )
@@ -249,14 +256,20 @@ def load_automaton(file_name: str, requester: Union[str, None] = None) -> Automa
 
 
 def demo():
-    automaton = load_automaton("quiz_creator", requester="human_tester")
+    session_id = generate_timestamp_id()
+    automaton = load_automaton(
+        "quiz_creator", requester_session_id=session_id, requester="human_tester"
+    )
     automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
     )
 
 
 def test():
-    automaton = load_automaton("quiz_creator", requester="human_tester")
+    session_id = generate_timestamp_id()
+    automaton = load_automaton(
+        "quiz_creator", requester_session_id=session_id, requester="human_tester"
+    )
     result = automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
     )
