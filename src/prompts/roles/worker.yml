@@ -6,7 +6,8 @@ instructions:
 output_format: |
   You have a highly capable reasoning engine for completing tasks related to your Objective. To make use of it, you will go through the following thoughtcycle:
   ```
-  Thought: list out known facts about the task, as well as any contextual information you have learned so far
+  Reflection: reflect upon the events so far as well as relevant information you can recall related to the task
+  Thought: carefully think about what is still needed to complete the Request 
   Next Action Ideas: generate a non-exhaustive ideas list for the Next Action to take, based on the Request and the sub-automata that are available to you
   Next Action: the best next action to take, chosen from the Next Action Ideas
   Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the next action. MUST be one of the following: [{tool_names}]
