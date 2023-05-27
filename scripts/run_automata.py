@@ -1,6 +1,5 @@
 """Run a specific automaton and its sub-automata."""
 
-from datetime import datetime
 from functools import lru_cache
 import functools
 import json
@@ -33,6 +32,7 @@ from src.loaders import (
     load_automaton_data,
 )
 from src.planners import load_planner
+from src.utilities import generate_timestamp_id
 from src.utilities.importing import quick_import
 
 
@@ -42,9 +42,13 @@ def load_reflect(automaton_path: Path, reflect_info: str) -> Callable[[str], str
 
 
 def load_background_knowledge(
-    automaton_path: Path, knowledge_info: str, request: Union[str, None] = None
-) -> str:
+    automaton_path: Path,
+    knowledge_info: Union[str, None],
+    request: Union[str, None] = None,
+) -> Union[str, None]:
     """Load the background knowledge for an automaton."""
+    if knowledge_info is None:
+        return None
     if knowledge_info.endswith(".py"):
         return quick_import(automaton_path / knowledge_info).load(request=request)
     raise NotImplementedError
@@ -101,7 +105,7 @@ def create_automaton_prompt(
     return prompt
 
 
-def add_run_handling(
+def add_session_handling(
     run: Callable,
     *,
     name: str,
@@ -133,7 +137,7 @@ def add_run_handling(
             "sub_automaton_name": name,
             "input": args[0],
             "result": result,
-            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": generate_timestamp_id(),
         }
         log_path = Path(f"automata/{requester}/event_log/{requester_session_id}.jsonl")
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -197,14 +201,10 @@ def load_automaton(
             )
             for name in data["sub_automata"]
         ]
-        background_knowledge = (
-            load_background_knowledge(
-                automaton_location,
-                data["background_knowledge"],
-                request=args[0],
-            )
-            if "background_knowledge" in data
-            else None
+        background_knowledge = load_background_knowledge(
+            automaton_location,
+            data["knowledge"],
+            request=args[0],
         )
 
         prompt = create_automaton_prompt(
@@ -218,13 +218,15 @@ def load_automaton(
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
-        llm_chain = LLMChain(llm=engine, prompt=prompt)
-        output_parser = AutomatonOutputParser(validator=output_validator)
+        # llm_chain = LLMChain(llm=engine, prompt=prompt)
+        # output_parser = AutomatonOutputParser(validator=output_validator)
         agent_executor = AutomatonExecutor.from_agent_and_tools(
             agent=AutomatonAgent(
-                llm_chain=llm_chain,
+                # llm_chain=llm_chain,
+                llm_chain=LLMChain(llm=engine, prompt=prompt),
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
-                output_parser=output_parser,
+                # output_parser=output_parser,
+                output_parser=AutomatonOutputParser(validator=output_validator),
                 reflect=reflect,
                 planner=planner,
             ),
@@ -243,7 +245,7 @@ def load_automaton(
 
     automaton = Tool(
         full_name,
-        add_run_handling(
+        add_session_handling(
             run,
             name=full_name,
             requester=requester,
