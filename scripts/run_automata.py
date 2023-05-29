@@ -43,14 +43,13 @@ def load_reflect(automaton_path: Path, reflect_info: str) -> Callable[[str], str
 
 def load_background_knowledge(
     automaton_path: Path,
-    knowledge_info: Union[str, None],
-    request: Union[str, None] = None,
-) -> Union[str, None]:
+    name: Union[str, None],
+) -> Union[Callable[[str], str], None]:
     """Load the background knowledge for an automaton."""
-    if knowledge_info is None:
+    if name is None:
         return None
-    if knowledge_info.endswith(".py"):
-        return quick_import(automaton_path / knowledge_info).load(request=request)
+    if name.endswith(".py"):
+        return quick_import(automaton_path / name).load_background_knowledge
     raise NotImplementedError
 
 
@@ -201,12 +200,15 @@ def load_automaton(
             )
             for name in data["sub_automata"]
         ]
-        background_knowledge = load_background_knowledge(
+        create_background_knowledge = load_background_knowledge(
             automaton_location,
             data["knowledge"],
-            request=args[0],
         )
-
+        background_knowledge = (
+            create_background_knowledge(args[0])
+            if create_background_knowledge
+            else None
+        )
         prompt = create_automaton_prompt(
             objective=data["objective"],
             self_instructions=data["instructions"],
