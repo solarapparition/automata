@@ -9,6 +9,7 @@ from typing import (
     Optional,
     Protocol,
     List,
+    Sequence,
     Tuple,
     Union,
 )
@@ -41,6 +42,11 @@ class AutomatonAction(NamedTuple):
     tool_input: str
     log: str
     reflection: Union[str, None]
+
+
+AutomatonStep = Tuple[AutomatonAction, str]
+
+AutomatonReflector = Callable[[Sequence[AutomatonStep]], str]
 
 
 class AutomatonOutputParser(AgentOutputParser):
@@ -106,7 +112,7 @@ class Planner(Protocol):
 class AutomatonAgent(ZeroShotAgent):
     """Agent for automata."""
 
-    reflect: Union[Callable[[Any], str], None]
+    reflect: Union[AutomatonReflector, None]
     """Reflect on information relevant to the current step."""
 
     planner: Planner
@@ -125,7 +131,8 @@ class AutomatonAgent(ZeroShotAgent):
         return value
 
     def _construct_scratchpad(
-        self, intermediate_steps: List[Tuple[AutomatonAction, str]]
+        self,
+        intermediate_steps: Sequence[AutomatonStep],
     ) -> str:
         """Construct the scratchpad that lets the agent continue its thought process."""
 
@@ -137,7 +144,7 @@ class AutomatonAgent(ZeroShotAgent):
         return thoughts
 
     def plan(
-        self, intermediate_steps: List[Tuple[AutomatonAction, str]], **kwargs: Any
+        self, intermediate_steps: Sequence[AutomatonStep], **kwargs: Any
     ) -> Union[AutomatonAction, AgentFinish]:
         """Given input, decided what to do.
 
@@ -166,8 +173,8 @@ class AutomatonExecutor(AgentExecutor):
         name_to_tool_map: Dict[str, BaseTool],
         color_mapping: Dict[str, str],
         inputs: Dict[str, str],
-        intermediate_steps: List[Tuple[AutomatonAction, str]],
-    ) -> Union[AgentFinish, List[Tuple[AutomatonAction, str]]]:
+        intermediate_steps: Sequence[AutomatonStep],
+    ) -> Union[AgentFinish, Sequence[AutomatonStep]]:
         """Take a single step in the thought-action-observation loop.
 
         Override this to take control of how the agent makes and acts on choices.
