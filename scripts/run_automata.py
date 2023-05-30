@@ -26,6 +26,7 @@ from src.automaton import (
     AutomatonAgent,
     AutomatonExecutor,
     AutomatonOutputParser,
+    AutomatonReflector,
 )
 from src.loaders import (
     get_full_name,
@@ -36,9 +37,15 @@ from src.utilities import generate_timestamp_id
 from src.utilities.importing import quick_import
 
 
-def load_reflect(automaton_path: Path, reflect_info: str) -> Callable[[str], str]:
+def load_reflect(automaton_path: Path, name: str) -> Union[AutomatonReflector, None]:
     """Load the reflection function for an automaton."""
-    return None
+    if name is None:
+        return None
+    if name.endswith(".py"):
+        return quick_import(automaton_path / name).reflect
+    if name == "default_action_logger":
+        raise NotImplementedError
+    raise NotImplementedError
 
 
 def load_background_knowledge(

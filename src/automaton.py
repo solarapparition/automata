@@ -46,7 +46,7 @@ class AutomatonAction(NamedTuple):
 
 AutomatonStep = Tuple[AutomatonAction, str]
 
-AutomatonReflector = Callable[[Sequence[AutomatonStep]], str]
+AutomatonReflector = Callable[[Sequence[AutomatonStep], str], Union[str, None]]
 
 
 class AutomatonOutputParser(AgentOutputParser):
@@ -158,7 +158,7 @@ class AutomatonAgent(ZeroShotAgent):
         """
 
         reflection = (
-            self.reflect(intermediate_steps, **kwargs) if self.reflect else None
+            self.reflect(intermediate_steps, kwargs["input"]) if self.reflect else None
         )
         print_text(f"\nReflection:\n{reflection}", color="yellow", end="\n\n")
         full_output = self.planner(self, intermediate_steps, reflection, **kwargs)
