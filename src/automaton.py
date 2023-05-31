@@ -212,7 +212,7 @@ class AutomatonExecutor(AgentExecutor):
             else:
                 tool_run_kwargs = self.agent.tool_run_logging_kwargs()
                 observation = InvalidSubAutomaton(
-                    sub_automata_allowed=name_to_tool_map.keys()
+                    sub_automata_allowed=list(name_to_tool_map.keys())
                 ).run(
                     agent_action.tool,
                     verbose=self.verbose,
