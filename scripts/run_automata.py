@@ -197,6 +197,8 @@ def load_automaton(
         )
         return run(*args, **kwargs)
 
+    self_session_id = generate_timestamp_id()
+
     # lazy load sub-automata until needed
     def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
