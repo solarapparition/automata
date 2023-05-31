@@ -111,6 +111,14 @@ def create_automaton_prompt(
     return prompt
 
 
+def save_event(event: Dict[str, str], automaton_id: str, session_id: str):
+    """Save an event to the event log of an automaton."""
+    log_path = Path(f"automata/{automaton_id}/event_log/{session_id}.jsonl")
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(log_path, "a", encoding="utf-8") as file:
+        file.write(json.dumps(event) + "\n")
+
+
 def add_session_handling(
     run: Callable,
     *,
@@ -147,11 +155,8 @@ def add_session_handling(
             "result": result,
             "timestamp": generate_timestamp_id(),
         }
-        log_path = Path(f"automata/{requester}/event_log/{requester_session_id}.jsonl")
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(log_path, "a", encoding="utf-8") as file:
-            file.write(json.dumps(event) + "\n")
-
+        save_event(event, automaton_id, session_id)
+        save_event(event, requester_id, requester_session_id)
         return result
 
     return wrapper
