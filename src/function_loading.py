@@ -116,7 +116,7 @@ def load_function(
     file_name: str,
     data: dict,
     engine: Union[BaseLLM, None],
-    requester: Union[str, None] = None,
+    requester_id: Union[str, None] = None,
 ) -> Callable[[str], str]:
     """Load a function, which are basically wrappers around external functionality (including other agents)."""
 
@@ -134,14 +134,14 @@ def load_function(
         run = assistant_chain.run
 
     elif file_name == "save_text":
-        run = partial(save_text, self_name=full_name, workspace_name=requester)
+        run = partial(save_text, self_name=full_name, workspace_name=requester_id)
 
     elif file_name == "load_file":
         run = partial(load_file, self_name=full_name)
 
     elif file_name == "view_workspace":
         run = partial(
-            view_workspace_files, self_name=full_name, workspace_name=requester
+            view_workspace_files, self_name=full_name, workspace_name=requester_id
         )
 
     elif file_name == "think":
@@ -159,7 +159,7 @@ def load_function(
         run = load_tools(["google-serper"], llm=engine)[0].run
 
     elif file_name == "notebook":
-        run = partial(open_notebook, self_name=full_name, requester=requester)
+        run = partial(open_notebook, self_name=full_name, requester=requester_id)
 
     else:
         raise NotImplementedError(f"Unsupported function name: {file_name}.")

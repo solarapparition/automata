@@ -114,14 +114,16 @@ def create_automaton_prompt(
 def add_session_handling(
     run: Callable,
     *,
-    name: str,
+    automaton_id: str,
+    session_id: str,
+    full_name: str,
     input_validator: Union[Callable[[str], Tuple[bool, str]], None],
-    requester: str,
+    requester_id: str,
     requester_session_id: str,
 ) -> Callable:
     """Handle errors and printouts during execution of a query."""
-    preprint = f"\n\n---{name}: Start---"
-    postprint = f"\n\n---{name}: End---"
+    preprint = f"\n\n---{full_name}: Start---"
+    postprint = f"\n\n---{full_name}: End---"
 
     @functools.wraps(run)
     def wrapper(*args, **kwargs):
@@ -135,12 +137,12 @@ def add_session_handling(
                 result = run(*args, **kwargs)
             except KeyboardInterrupt:
                 # manual interruption should escape back to the requester
-                result = f"Sub-automaton `{name}` took too long to process and was manually stopped."
+                result = f"Sub-automaton `{full_name}` took too long to process and was manually stopped."
             print(postprint)
 
         event = {
-            "requester": get_full_name(requester),
-            "sub_automaton_name": name,
+            "requester": requester_id,
+            "sub_automaton_name": automaton_id,
             "input": args[0],
             "result": result,
             "timestamp": generate_timestamp_id(),
@@ -157,12 +159,12 @@ def add_session_handling(
 
 @lru_cache(maxsize=None)
 def load_automaton(
-    file_name: str, requester_session_id: str, requester: str
+    automaton_id: str, requester_session_id: str, requester_id: str
 ) -> Automaton:
     """Load an automaton from a YAML file."""
 
-    data = load_automaton_data(file_name)
-    automaton_location = Path(f"automata/{file_name}")
+    data = load_automaton_data(automaton_id)
+    automaton_location = Path(f"automata/{automaton_id}")
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     engine = create_engine(engine)
@@ -178,15 +180,15 @@ def load_automaton(
     )
 
     input_validator = load_input_validator(
-        data["input_validator"], input_requirements, file_name
+        data["input_validator"], input_requirements, automaton_id
     )
 
     def run_function(*args, **kwargs) -> str:
         run = load_function(
-            file_name,
+            automaton_id,
             data,
             engine,
-            requester=requester,
+            requester_id=requester_id,
         )
         return run(*args, **kwargs)
 
@@ -194,18 +196,19 @@ def load_automaton(
     def run_core_automaton(*args, **kwargs) -> str:
         request = args[0]
         output_validator: Union[IOValidator, None] = load_output_validator(
-            data["output_validator"], request=request, file_name=file_name
+            data["output_validator"], request=request, file_name=automaton_id
         )
         reflect: Union[Callable, None] = load_reflect(
-            Path(f"automata/{file_name}"), data["reflect"]
+            Path(f"automata/{automaton_id}"), data["reflect"]
         )
         planner = load_planner(automaton_location, data["planner"])
-        self_session_id = generate_timestamp_id()
         sub_automata = [
             load_automaton(
-                name, requester_session_id=self_session_id, requester=file_name
+                sub_automata_id,
+                requester_session_id=self_session_id,
+                requester_id=automaton_id,
             )
-            for name in data["sub_automata"]
+            for sub_automata_id in data["sub_automata"]
         ]
         create_background_knowledge = load_background_knowledge(
             automaton_location,
@@ -223,7 +226,7 @@ def load_automaton(
             role_info=get_role_info(data["role"]),
             background_knowledge=background_knowledge,
             sub_automata=sub_automata,
-            requester=requester,
+            requester=requester_id,
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
@@ -254,8 +257,10 @@ def load_automaton(
         full_name,
         add_session_handling(
             run,
-            name=full_name,
-            requester=requester,
+            automaton_id=automaton_id,
+            session_id=self_session_id,
+            full_name=full_name,
+            requester_id=requester_id,
             input_validator=input_validator,
             requester_session_id=requester_session_id,
         ),
@@ -267,7 +272,7 @@ def load_automaton(
 def demo():
     session_id = generate_timestamp_id()
     automaton = load_automaton(
-        "quiz_creator", requester_session_id=session_id, requester="human_tester"
+        "quiz_creator", requester_session_id=session_id, requester_id="human_tester"
     )
     automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
@@ -277,7 +282,7 @@ def demo():
 def test():
     session_id = generate_timestamp_id()
     automaton = load_automaton(
-        "quiz_creator", requester_session_id=session_id, requester="human_tester"
+        "quiz_creator", requester_session_id=session_id, requester_id="human_tester"
     )
     result = automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
