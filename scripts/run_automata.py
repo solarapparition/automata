@@ -227,8 +227,6 @@ def load_automaton(
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
-        # llm_chain = LLMChain(llm=engine, prompt=prompt)
-        # output_parser = AutomatonOutputParser(validator=output_validator)
         agent_executor = AutomatonExecutor.from_agent_and_tools(
             agent=AutomatonAgent(
                 # llm_chain=llm_chain,
