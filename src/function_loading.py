@@ -109,26 +109,26 @@ def open_notebook(action_input: str, self_name: str, requester: str) -> str:
         return f"{self_name}: successfully added note to notebook."
 
 
-def load_function(
-    file_name: str,
+def run_llm_assistant(action_input: str, engine: BaseLLM) -> str:
+    """Run an LLM assistant."""
+    template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible, and provide no further information."
+    system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+    human_template = "{text}"
+    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [system_message_prompt, human_message_prompt]
+    )
+    assistant_chain = LLMChain(llm=engine, prompt=chat_prompt)
+    return assistant_chain.run(action_input)
+
+
+def load_automaton_function(
+    self_id: str,
     data: dict,
     engine: Union[BaseLLM, None],
     requester_id: Union[str, None] = None,
 ) -> Callable[[str], str]:
-    """Load a function, which are basically wrappers around external functionality (including other agents)."""
-
-    full_name = f"{data['name']} ({data['role']} {data['rank']})"
-
-    if file_name == "llm_assistant":
-        template = "You are a helpful assistant who can help generate a variety of content. However, if anyone asks you to access files, or refers to something from a past interaction, you will immediately inform them that the task is not possible, and provide no further information."
-        system_message_prompt = SystemMessagePromptTemplate.from_template(template)
-        human_template = "{text}"
-        human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-        chat_prompt = ChatPromptTemplate.from_messages(
-            [system_message_prompt, human_message_prompt]
-        )
-        assistant_chain = LLMChain(llm=engine, prompt=chat_prompt)
-        run = assistant_chain.run
+    """Load an automaton function, which are basically wrappers around external functionality (including other agents)."""
 
     elif file_name == "save_text":
         run = partial(save_text, self_name=full_name, workspace_name=requester_id)
