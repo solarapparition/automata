@@ -17,9 +17,6 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-
-sys.path.append("")
-
 from src.globals import resource_metadata
 from src.indexing import create_notebook_module_index
 
