@@ -73,6 +73,8 @@ class AutomatonOutputParser(AgentOutputParser):
         action = match.group(1).strip()
         action_input = match.group(3)
         if self.final_answer_action in action:
+            if self.validate is not None:
+                validation_result = self.validate(action_input)
             return AgentFinish({"output": action_input}, text)
         return AutomatonAction(
             action, action_input.strip(" ").strip('"').strip("."), text, reflection
