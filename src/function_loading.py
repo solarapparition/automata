@@ -4,7 +4,6 @@ from datetime import datetime
 from functools import partial
 import json
 from pathlib import Path
-import sys
 from typing import Callable, Union
 
 from llama_index import GPTVectorStoreIndex
@@ -19,9 +18,12 @@ from langchain.prompts.chat import (
 )
 from src.globals import resource_metadata
 from src.indexing import create_notebook_module_index
+from src.loaders import get_full_name
 
 
-def save_text(action_input: str, self_name: str, workspace_name: str) -> str:
+def save_text_to_workspace(
+    action_input: str, self_name: str, workspace_name: str
+) -> str:
     """Save a file."""
     try:
         input_json = json.loads(action_input)
@@ -130,32 +132,39 @@ def load_automaton_function(
 ) -> Callable[[str], str]:
     """Load an automaton function, which are basically wrappers around external functionality (including other agents)."""
 
-    elif file_name == "save_text":
-        run = partial(save_text, self_name=full_name, workspace_name=requester_id)
+    full_name = get_full_name(self_id)
 
-    elif file_name == "load_file":
+    if self_id == "llm_assistant":
+        run = partial(run_llm_assistant, engine=engine)
+
+    elif self_id == "save_text":
+        run = partial(
+            save_text_to_workspace, self_name=full_name, workspace_name=requester_id
+        )
+
+    elif self_id == "load_file":
         run = partial(load_file, self_name=full_name)
 
-    elif file_name == "view_workspace":
+    elif self_id == "view_workspace":
         run = partial(
             view_workspace_files, self_name=full_name, workspace_name=requester_id
         )
 
-    elif file_name == "think":
+    elif self_id == "think":
         run = lambda thought: f"I must think about my next steps. {thought}"
 
-    elif file_name == "human":
+    elif self_id == "human":
         run = load_tools(["human"])[0].run
 
-    elif file_name == "finalize":
+    elif self_id == "finalize":
         run = (
             lambda _: None
         )  # not meant to actually be run; the finalize action should be caught by the parser first
 
-    elif file_name == "search":
+    elif self_id == "search":
         run = load_tools(["google-serper"], llm=engine)[0].run
 
-    elif file_name == "notebook":
+    elif self_id == "notebook":
         run = partial(open_notebook, self_name=full_name, requester=requester_id)
 
     else:
