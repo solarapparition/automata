@@ -137,7 +137,7 @@ def load_automaton(
     )
 
     def run_function(*args, **kwargs) -> str:
-        run = load_function(
+        run = load_automaton_function(
             automaton_id,
             data,
             engine,
