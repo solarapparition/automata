@@ -187,7 +187,6 @@ def load_automaton(
         # breakpoint()
         agent_executor = AutomatonExecutor.from_agent_and_tools(
             agent=AutomatonAgent(
-                # llm_chain=llm_chain,
                 llm_chain=LLMChain(llm=engine, prompt=prompt),
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
                 output_parser=AutomatonOutputParser(validate=output_validator),
