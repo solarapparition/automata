@@ -13,7 +13,7 @@ sys.path.append("")
 
 from src.globals import AUTOMATON_AFFIXES
 from src.engines import create_engine
-from src.function_loading import load_function
+from src.function_loading import load_automaton_function
 from src.validation import (
     load_input_validator,
     load_output_validator,
