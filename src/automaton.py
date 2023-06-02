@@ -53,7 +53,7 @@ class AutomatonOutputParser(AgentOutputParser):
     """A modified version of Lanchain's MRKL parser to handle when the agent does not specify the correct action and input format."""
 
     final_answer_action = "Finalize Reply"
-    validator: Union[IOValidator, None] = None
+    validate: Union[IOValidator, None] = None
 
     def parse(
         self, text: str, reflection: Optional[str] = None
