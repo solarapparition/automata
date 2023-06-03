@@ -1,13 +1,11 @@
 """Run a specific automaton and its sub-automata."""
 
 from functools import lru_cache
-from pathlib import Path
 import sys
 from typing import Callable, Dict, List, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import Tool
-import yaml
 
 sys.path.append("")
 
@@ -24,47 +22,17 @@ from automata.automaton import (
     AutomatonAgent,
     AutomatonExecutor,
     AutomatonOutputParser,
-    AutomatonReflector,
 )
+from automata.knowledge import load_knowledge
 from automata.loaders import (
     get_full_name,
+    get_role_info,
     load_automaton_data,
 )
 from automata.planners import load_planner
+from automata.reflection import load_reflect
 from automata.sessions import add_session_handling
 from automata.utilities import generate_timestamp_id
-from automata.utilities.importing import quick_import
-
-
-def load_reflect(automaton_path: Path, name: str) -> Union[AutomatonReflector, None]:
-    """Load the reflection function for an automaton."""
-    if name is None:
-        return None
-    if name.endswith(".py"):
-        return quick_import(automaton_path / name).reflect
-    if name == "default_action_logger":
-        raise NotImplementedError
-    raise NotImplementedError
-
-
-def load_background_knowledge(
-    automaton_path: Path,
-    name: Union[str, None],
-) -> Union[Callable[[str], str], None]:
-    """Load the background knowledge for an automaton."""
-    if name is None:
-        return None
-    if name.endswith(".py"):
-        return quick_import(automaton_path / name).load_background_knowledge
-    raise NotImplementedError
-
-
-def get_role_info(role: str) -> Dict:
-    """Get the role info for a given role."""
-    return yaml.load(
-        Path(f"automata/prompts/roles/{role}.yml").read_text(encoding="utf-8"),
-        Loader=yaml.FullLoader,
-    )
 
 
 def create_automaton_prompt(
@@ -164,7 +132,7 @@ def load_automaton(
             )
             for sub_automata_id in data["sub_automata"]
         ]
-        create_background_knowledge = load_background_knowledge(
+        create_background_knowledge = load_knowledge(
             automaton_location,
             data["knowledge"],
         )

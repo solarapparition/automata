@@ -5,7 +5,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    NamedTuple,
     Optional,
     Protocol,
     List,
@@ -21,7 +20,8 @@ from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 from pydantic import validator
 
-from automata.validation import IOValidator
+from .types import AutomatonAction, AutomatonStep, AutomatonReflector
+from .validation import IOValidator
 
 
 class Automaton(Protocol):
@@ -33,20 +33,6 @@ class Automaton(Protocol):
     """Function that takes in a query and returns a response."""
     description: str
     """Description of the automaton. Viewable to requesters."""
-
-
-class AutomatonAction(NamedTuple):
-    """An action for an automaton."""
-
-    tool: str
-    tool_input: str
-    log: str
-    reflection: Union[str, None]
-
-
-AutomatonStep = Tuple[AutomatonAction, str]
-
-AutomatonReflector = Callable[[Sequence[AutomatonStep], str], Union[str, None]]
 
 
 class AutomatonOutputParser(AgentOutputParser):
