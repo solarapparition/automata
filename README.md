@@ -36,14 +36,18 @@ The core capabilities of the system are still being developed, so the currently 
 2. Change directory to the repo
 3. [Optional, recommended] Create a virtual environment for the project
 4. Run `pip install -r requirements.txt`
-5. Run `python scripts/run_automata.py`
+5. Run `python scripts/demo.py`
 
 This will run the `Quiz Creator` automaton, which creates and saves a quiz to a file.
 
 ## Development Goals
 
-### Short Term:
+### Completed:
+- Create architecture for automata system.
 - Establish the core logical structure of each individual automaton.
+
+### Short Term:
+- TBD
 
 ### Medium Term:
 - Create a set of automata that can collectively perform a more complex learning task (such as figuring out the design principles of a code repository) than what simple agents are capable of right now.
