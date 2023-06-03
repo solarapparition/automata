@@ -5,7 +5,7 @@ from typing import List, Tuple, Union
 
 from langchain.agents import Agent
 
-from automata.automaton import AutomatonAction
+from automata.types import AutomatonAction
 from automata.utilities.importing import quick_import
 
 

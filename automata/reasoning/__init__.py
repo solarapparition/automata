@@ -20,19 +20,8 @@ from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 from pydantic import validator
 
-from .types import AutomatonAction, AutomatonStep, AutomatonReflector
-from .validation import IOValidator
-
-
-class Automaton(Protocol):
-    """Protocol for automata. Uses the same interface as the Langchain `Tool` class."""
-
-    name: str
-    """Name of the automaton. Viewable to requesters."""
-    run: Callable[[str], str]
-    """Function that takes in a query and returns a response."""
-    description: str
-    """Description of the automaton. Viewable to requesters."""
+from automata.types import AutomatonAction, AutomatonStep, AutomatonReflector
+from automata.validation import IOValidator
 
 
 class AutomatonOutputParser(AgentOutputParser):
