@@ -119,8 +119,7 @@ def load_automaton(
     data = load_automaton_data(automaton_id)
     automaton_location = AUTOMATON_DATA_LOC / automaton_id
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
-    engine = data["engine"]
-    engine = create_engine(engine)
+    engine = create_engine(data["engine"])
 
     input_requirements = data["input_requirements"]
     input_requirements_prompt = (
