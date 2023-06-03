@@ -189,7 +189,7 @@ def load_automaton(
             agent=AutomatonAgent(
                 llm_chain=LLMChain(llm=engine, prompt=prompt),
                 allowed_tools=[sub_automaton.name for sub_automaton in sub_automata],
-                output_parser=AutomatonOutputParser(validate=output_validator),
+                output_parser=AutomatonOutputParser(validate_output=output_validator),
                 reflect=reflect,
                 planner=planner,
             ),
