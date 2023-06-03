@@ -5,9 +5,9 @@ from functools import partial
 import json
 from typing import Callable, Dict, List, Tuple, Union
 
-from src.loaders import get_full_name
-from src.engines import create_engine
-from src.llm_function import make_llm_function
+from automata.loaders import get_full_name
+from automata.engines import create_engine
+from automata.llm_function import make_llm_function
 
 
 IOValidator = Callable[[str], Tuple[bool, str]]

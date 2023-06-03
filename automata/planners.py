@@ -5,8 +5,8 @@ from typing import List, Tuple, Union
 
 from langchain.agents import Agent
 
-from src.automaton import AutomatonAction
-from src.utilities.importing import quick_import
+from automata.automaton import AutomatonAction
+from automata.utilities.importing import quick_import
 
 
 def default_zero_shot_planner(

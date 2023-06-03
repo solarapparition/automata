@@ -1,6 +1,6 @@
-"""Background knowledge about the `src` package."""
+"""Background knowledge about the `automata` package."""
 
-from src.utilities.analyze_package import analyze_package
+from automata.utilities.analyze_package import analyze_package
 
 
 def format_summary(info_dict: dict, prefix: str = "") -> str:
@@ -14,9 +14,9 @@ def format_summary(info_dict: dict, prefix: str = "") -> str:
 
 
 def load() -> str:
-    """Analyze the src package and return a summary."""
-    package_info = analyze_package("src", top_level_only=True)
-    return f'You have background knowledge regarding the `src` package. The information is as follows:\nsrc: {package_info["docstring_summary"]}\n{format_summary(package_info)}'
+    """Analyze this package and return a summary."""
+    package_info = analyze_package("automata", top_level_only=True)
+    return f'You have background knowledge regarding the `automata` package. The information is as follows:\nautomata: {package_info["docstring_summary"]}\n{format_summary(package_info)}'
 
 
 if __name__ == "__main__":

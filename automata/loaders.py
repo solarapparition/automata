@@ -5,7 +5,7 @@ from typing import Dict
 
 import yaml
 
-from src.config import AUTOMATON_DATA_LOC
+from automata.config import AUTOMATON_DATA_LOC
 
 
 @lru_cache

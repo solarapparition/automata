@@ -6,6 +6,7 @@ instructions:
 output_format: |
   You have a highly capable reasoning engine for figuring out answers to questions related to your Objective. To make use of it, you will go through the following thoughtcycle:
   ```
+  Reflection: tbd
   Thought: list out known facts about the question, as well as any contextual information you have learned from your investigation so far
   Sub-Question Ideas: generate a non-exhaustive ideas list for simpler sub-questions that relate to the main question in the Request
   Sub-Question: the best sub-question to ask to answer the main question, chosen from the Sub-Question Ideas. It must be a question that can be answered by using a sub-automaton

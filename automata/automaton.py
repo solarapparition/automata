@@ -21,7 +21,7 @@ from langchain.schema import AgentFinish
 from langchain.tools.base import BaseTool
 from pydantic import validator
 
-from src.validation import IOValidator
+from automata.validation import IOValidator
 
 
 class Automaton(Protocol):

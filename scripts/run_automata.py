@@ -11,29 +11,29 @@ import yaml
 
 sys.path.append("")
 
-from src.config import AUTOMATON_AFFIXES, AUTOMATON_DATA_LOC
-from src.engines import create_engine
-from src.function_loading import load_automaton_function
-from src.validation import (
+from automata.config import AUTOMATON_AFFIXES, AUTOMATON_DATA_LOC
+from automata.engines import create_engine
+from automata.function_loading import load_automaton_function
+from automata.validation import (
     load_input_validator,
     load_output_validator,
     IOValidator,
 )
-from src.automaton import (
+from automata.automaton import (
     Automaton,
     AutomatonAgent,
     AutomatonExecutor,
     AutomatonOutputParser,
     AutomatonReflector,
 )
-from src.loaders import (
+from automata.loaders import (
     get_full_name,
     load_automaton_data,
 )
-from src.planners import load_planner
-from src.sessions import add_session_handling
-from src.utilities import generate_timestamp_id
-from src.utilities.importing import quick_import
+from automata.planners import load_planner
+from automata.sessions import add_session_handling
+from automata.utilities import generate_timestamp_id
+from automata.utilities.importing import quick_import
 
 
 def load_reflect(automaton_path: Path, name: str) -> Union[AutomatonReflector, None]:
@@ -62,7 +62,7 @@ def load_background_knowledge(
 def get_role_info(role: str) -> Dict:
     """Get the role info for a given role."""
     return yaml.load(
-        Path(f"src/prompts/roles/{role}.yml").read_text(encoding="utf-8"),
+        Path(f"automata/prompts/roles/{role}.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,
     )
 
@@ -266,8 +266,8 @@ def test():
     # automaton = load_automaton("search", requester="human_tester")
     # print(result := automaton.run("What is chain-of-thought prompting?"))
 
-    # automaton = load_automaton("src_keeper", requester="human_tester")
-    # print(result := automaton.run("What is the purpose of the 'src' package?"))
+    # automaton = load_automaton("automata_keeper", requester="human_tester")
+    # print(result := automaton.run("What is the purpose of the 'automata' package?"))
 
     breakpoint()
 

@@ -16,9 +16,9 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from src.config import resource_metadata, AUTOMATON_DATA_LOC
-from src.indexing import create_notebook_module_index
-from src.loaders import get_full_name
+from automata.config import resource_metadata, AUTOMATON_DATA_LOC
+from automata.indexing import create_notebook_module_index
+from automata.loaders import get_full_name
 
 
 def save_text_to_workspace(

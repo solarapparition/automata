@@ -7,7 +7,7 @@ from typing import List, Union
 from llama_index import GPTVectorStoreIndex
 from llama_index.data_structs.node_v2 import Node, DocumentRelationship
 
-from src.utilities.module_processing import (
+from automata.utilities.module_processing import (
     split_module_chunks,
     extract_function_name,
     construct_fn_id,

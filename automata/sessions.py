@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Callable, Dict, Tuple, Union
 
-from src.utilities import generate_timestamp_id
+from automata.utilities import generate_timestamp_id
 
 
 def save_event(event: Dict[str, str], automaton_id: str, session_id: str):
