@@ -11,7 +11,7 @@ import yaml
 
 sys.path.append("")
 
-from src.globals import AUTOMATON_AFFIXES
+from src.config import AUTOMATON_AFFIXES, AUTOMATON_DATA_LOC
 from src.engines import create_engine
 from src.function_loading import load_automaton_function
 from src.validation import (
@@ -117,7 +117,7 @@ def load_automaton(
     """Load an automaton from a YAML file."""
 
     data = load_automaton_data(automaton_id)
-    automaton_location = Path(f"automata/{automaton_id}")
+    automaton_location = AUTOMATON_DATA_LOC / automaton_id
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = data["engine"]
     engine = create_engine(engine)
@@ -154,7 +154,7 @@ def load_automaton(
             data["output_validator"], request=request, file_name=automaton_id
         )
         reflect: Union[Callable, None] = load_reflect(
-            Path(f"automata/{automaton_id}"), data["reflect"]
+            AUTOMATON_DATA_LOC / automaton_id, data["reflect"]
         )
         planner = load_planner(automaton_location, data["planner"])
         sub_automata = [

@@ -1,16 +1,17 @@
 """Load automaton info from source files."""
 
 from functools import lru_cache
-from pathlib import Path
 from typing import Dict
 
 import yaml
+
+from src.config import AUTOMATON_DATA_LOC
 
 
 @lru_cache
 def load_automaton_data(file_name: str) -> Dict:
     """Load an automaton from a YAML file."""
-    automaton_path = Path(f"automata/{file_name}")
+    automaton_path = AUTOMATON_DATA_LOC / file_name
     data = yaml.load(
         (automaton_path / "spec.yml").read_text(encoding="utf-8"),
         Loader=yaml.FullLoader,

@@ -16,7 +16,7 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from src.globals import resource_metadata
+from src.config import resource_metadata, AUTOMATON_DATA_LOC
 from src.indexing import create_notebook_module_index
 from src.loaders import get_full_name
 
@@ -69,8 +69,8 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
 
 def open_notebook(action_input: str, self_name: str, requester: str) -> str:
     """Open a notebook and perform a read or write action on it."""
-    notebook_loc = Path(f"automata/{requester}/notebook.jsonl")
-    notebook_index_loc = Path(f"automata/{requester}/notebook_index.json")
+    notebook_loc = AUTOMATON_DATA_LOC / requester / "notebook.jsonl"
+    notebook_index_loc = AUTOMATON_DATA_LOC / requester / "notebook_index.json"
     if notebook_index_loc.exists():
         notebook_index = GPTVectorStoreIndex.load_from_disk(notebook_index_loc)
     else:
