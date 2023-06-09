@@ -9,4 +9,4 @@ input_validator:
 rank: 0
 engine: null
 role: worker
-runner: default_function_runner
+runner: builtin_function_runner
