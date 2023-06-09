@@ -30,6 +30,7 @@ from automata.reflection import load_reflect
 from automata.sessions import add_session_handling
 from automata.types import Automaton
 from automata.utilities import generate_timestamp_id
+from .utilities.importing import quick_import
 
 
 def create_automaton_prompt(
@@ -168,12 +169,16 @@ def load_automaton(
         "builtin_function_runner": run_builtin_function,
         "core_automaton_runner": run_core_automaton,
     }
-    run = run_mapping[data["runner"]]
+    runner_name: str = data["runner"]
+    if runner_name.endswith(".py"):
+        runner = quick_import(AUTOMATON_DATA_LOC / runner_name).run
+    else:
+        runner = run_mapping[runner_name]
 
     automaton = Tool(
         full_name,
         add_session_handling(
-            run,
+            runner,
             automaton_id=automaton_id,
             session_id=self_session_id,
             full_name=full_name,
