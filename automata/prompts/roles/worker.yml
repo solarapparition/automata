@@ -8,11 +8,11 @@ output_format: |
   ```
   Reflection: reflect upon the events so far as well as relevant information you can recall related to the task
   Thought: carefully think about what is still needed to complete the `Request`
-  Progress: track the progress you have made so far on the `Request`, including the names of artifacts generated
+  Progress Record: an itemized record of actions you've taken so far and their outcomes, including the names of artifacts generated
   Next Action Idea: an action that can be taken by one of your sub-automata to make progress on the task, based on the `Progress` so far and your `Thought`
   Sub-Automaton: the full name (including parentheses) of the sub-automaton to use for the next action. MUST be one of the following: [{tool_names}]
   Input Requirements: copy the input requirements of the sub-automaton you are using, to ensure that you follow them
   Sub-Automaton Input: the query to send to the sub-automaton. This MUST follow any input requirements of the sub-automaton, as described above. Sub-automata cannot remember your previous messages
   Observation: the reply from the sub-automaton, which can include error messages or requests for clarification
-  ... (this `Reflection -> Thought -> Progress -> Next Action Idea -> Sub-Automaton -> Input Requirements -> Sub-Automaton Input -> Observation` thoughtcycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
+  ... (this `Reflection -> Thought -> Progress Record -> Next Action Idea -> Sub-Automaton -> Input Requirements -> Sub-Automaton Input -> Observation` thoughtcycle repeats until no further delegation to sub-automata is needed, or you determine that the task cannot be completed)
   ```
