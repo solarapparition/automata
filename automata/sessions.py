@@ -2,15 +2,14 @@
 
 import functools
 import json
-from pathlib import Path
 from typing import Callable, Dict, Tuple, Union
 
 from automata.utilities import generate_timestamp_id
-
+from .config import AUTOMATON_DATA_LOC
 
 def save_event(event: Dict[str, str], automaton_id: str, session_id: str):
     """Save an event to the event log of an automaton."""
-    log_path = Path(f"automata/{automaton_id}/event_log/{session_id}.jsonl")
+    log_path = AUTOMATON_DATA_LOC / f"{automaton_id}/event_log/{session_id}.jsonl"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "a", encoding="utf-8") as file:
         file.write(json.dumps(event) + "\n")
