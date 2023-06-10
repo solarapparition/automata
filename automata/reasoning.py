@@ -73,7 +73,7 @@ class InvalidSubAutomaton(BaseTool):
 
 
 @runtime_checkable
-class Planner(Protocol):
+class AutomatonPlanner(Protocol):
     """Planner for automata."""
 
     def __call__(
@@ -92,7 +92,7 @@ class AutomatonAgent(ZeroShotAgent):
     reflect: Union[AutomatonReflector, None]
     """Reflect on information relevant to the current step."""
 
-    planner: Planner
+    planner: AutomatonPlanner
     """Plan the next step."""
 
     class Config:
@@ -103,7 +103,7 @@ class AutomatonAgent(ZeroShotAgent):
     @validator("planner")
     def check_planner(cls, value):  # pylint: disable=no-self-argument
         """Check that the planner implements the `Planner` protocol."""
-        if not isinstance(value, Planner):
+        if not isinstance(value, AutomatonPlanner):
             raise ValueError("`planner` must implement the `Planner` protocol.")
         return value
 
