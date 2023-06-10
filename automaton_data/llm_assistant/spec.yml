@@ -12,5 +12,5 @@ instructions: null
 rank: 0
 engine: gpt-3.5-turbo
 role: worker
-runner: builtin_function_runner
+runner: default_function_runner
 sub_automata: null

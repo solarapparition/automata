@@ -101,7 +101,7 @@ def load_automaton(
         data["input_validator"], input_requirements, automaton_id
     )
 
-    def run_builtin_function(*args, **kwargs) -> str:
+    def run_automaton_function(*args, **kwargs) -> str:
         run = load_automaton_function(
             automaton_id,
             data,
@@ -166,8 +166,8 @@ def load_automaton(
         return agent_executor.run(*args, **kwargs)
 
     run_mapping = {
-        "builtin_function_runner": run_builtin_function,
-        "core_automaton_runner": run_core_automaton,
+        "default_function_runner": run_automaton_function,
+        "default_automaton_runner": run_core_automaton,
     }
     runner_name: str = data["runner"]
     if runner_name.endswith(".py"):
