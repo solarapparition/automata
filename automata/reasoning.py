@@ -3,7 +3,6 @@
 import re
 from typing import (
     Any,
-    Callable,
     Dict,
     Optional,
     Protocol,
