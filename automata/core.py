@@ -1,6 +1,6 @@
 """Core automata functionality."""
 
-from functools import lru_cache
+from functools import lru_cache, partial
 from typing import Callable, Dict, List, Union
 
 from langchain import LLMChain, PromptTemplate
@@ -8,7 +8,7 @@ from langchain.agents import Tool
 
 from automata.config import AUTOMATON_AFFIXES, AUTOMATON_DATA_LOC
 from automata.engines import create_engine
-from automata.function_loading import load_automaton_function
+from automata.builtin_functions import load_builtin_function
 from automata.validation import (
     load_input_validator,
     load_output_validator,
@@ -28,7 +28,7 @@ from automata.loaders import (
 from automata.planners import load_planner
 from automata.reflection import load_reflect
 from automata.sessions import add_session_handling
-from automata.types import Automaton
+from automata.types import Automaton, AutomatonRunner
 from automata.utilities import generate_timestamp_id
 from .utilities.importing import quick_import
 
@@ -101,8 +101,8 @@ def load_automaton(
         data["input_validator"], input_requirements, automaton_id
     )
 
-    def run_automaton_function(*args, **kwargs) -> str:
-        run = load_automaton_function(
+    def run_builtin_function(*args, **kwargs) -> str:
+        run = load_builtin_function(
             automaton_id,
             data,
             engine,
@@ -165,15 +165,24 @@ def load_automaton(
         )
         return agent_executor.run(*args, **kwargs)
 
-    run_mapping = {
-        "default_function_runner": run_automaton_function,
-        "default_automaton_runner": run_core_automaton,
-    }
     runner_name: str = data["runner"]
+
     if runner_name.endswith(".py"):
-        runner = quick_import(AUTOMATON_DATA_LOC / runner_name).run
+        custom_runner: AutomatonRunner = quick_import(
+            AUTOMATON_DATA_LOC / runner_name
+        ).run
+        runner = partial(
+            custom_runner,
+            automaton_id=automaton_id,
+            automata_data=data,
+            requester_id=requester_id,
+        )
+    elif runner_name == "default_function_runner":
+        runner = run_builtin_function
+    elif runner_name == "default_automaton_runner":
+        runner = run_core_automaton
     else:
-        runner = run_mapping[runner_name]
+        raise NotImplementedError(f"Unknown runner {runner_name}")
 
     automaton = Tool(
         full_name,
