@@ -13,7 +13,7 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from automata.config import resource_metadata
+from automata.config import RESOURCE_METADATA
 from automata.loaders import get_full_name
 
 
@@ -31,7 +31,7 @@ def save_text_to_workspace(
     path: Path = Path(f"workspace/{workspace_name}/{file_name}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(str(content), encoding="utf-8")
-    resource_metadata.set_description(str(path), description)
+    RESOURCE_METADATA.set_description(str(path), description)
     return f"{self_name}: saved file to `{path.relative_to('workspace')}`"
 
 
@@ -54,7 +54,7 @@ def view_workspace_files(_, self_name: str, workspace_name: str) -> str:
     """View files in a workspace."""
     path: Path = Path("workspace") / workspace_name
     file_info = (
-        f"- `{file.relative_to('workspace')}`: {resource_metadata.get_description(str(file))}"
+        f"- `{file.relative_to('workspace')}`: {RESOURCE_METADATA.get_description(str(file))}"
         for file in path.iterdir()
     )
     if not path.exists():
