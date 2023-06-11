@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Union
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import Tool
 
-from automata.config import AUTOMATON_AFFIXES
+from automata.global_vars import AUTOMATON_AFFIXES
 from automata.engines import create_engine
 from automata.builtin_functions import load_builtin_function
 from automata.validation import (

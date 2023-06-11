@@ -13,7 +13,7 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from automata.config import RESOURCE_METADATA
+from automata.global_vars import RESOURCE_METADATA
 from automata.loaders import get_full_name
 
 
