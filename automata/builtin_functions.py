@@ -78,13 +78,14 @@ def run_llm_assistant(action_input: str, engine: BaseLLM) -> str:
 
 def load_builtin_function(
     self_id: str,
+    automata_location: Path,
     data: dict,
     engine: Union[BaseLLM, None],
     requester_id: Union[str, None] = None,
 ) -> Callable[[str], str]:
     """Load an automaton function, which are basically wrappers around external functionality (including other agents)."""
 
-    full_name = get_full_name(self_id)
+    full_name = get_full_name(self_id, automata_location)
 
     if self_id == "llm_assistant":
         run = partial(run_llm_assistant, engine=engine)

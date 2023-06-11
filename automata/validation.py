@@ -3,6 +3,7 @@
 import ast
 from functools import partial
 import json
+from pathlib import Path
 from typing import Callable, Dict, List, Tuple, Union
 
 from automata.loaders import get_full_name
@@ -85,7 +86,7 @@ def validate_input(
 
 
 def load_input_validator(
-    validator_data: Union[Dict, None], requirements: List[str], file_name: str
+    validator_data: Union[Dict, None], requirements: List[str], automaton_id: str, automata_location: Path
 ) -> Union[IOValidator, None]:
     """Load the input validator based on data given."""
     if validator_data is None:
@@ -94,7 +95,7 @@ def load_input_validator(
     logic = validator_data["logic"]
     if not (engine and logic):
         raise ValueError(
-            f"Must specify both `engine` and `logic` for input validator. Please check specs for `{file_name}`."
+            f"Must specify both `engine` and `logic` for input validator. Please check specs for `{automaton_id}`."
         )
 
     if logic == "default_llm_validator":
@@ -103,9 +104,9 @@ def load_input_validator(
         return partial(
             validate_input,
             input_inspector=input_inspector,
-            full_name=get_full_name(file_name),
+            full_name=get_full_name(automaton_id, automata_location),
         )
-    raise ValueError(f"{file_name}: Logic `{logic}` not supported yet.")
+    raise ValueError(f"{automaton_id}: Logic `{logic}` not supported yet.")
 
 
 def load_output_validator(

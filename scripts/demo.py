@@ -15,7 +15,7 @@ def demo():
         "quiz_creator",
         requester_session_id=session_id,
         requester_id="human_tester",
-        automata_location=Path("automata_data"),
+        automata_location=Path("automaton_data"),
     )
     automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."
@@ -28,7 +28,7 @@ def test():
         "quiz_creator",
         requester_session_id=session_id,
         requester_id="human_tester",
-        automata_location=Path("automata_data"),
+        automata_location=Path("automaton_data"),
     )
     result = automaton.run(
         "Create a quiz having the subject matter of mathematics, and a difficulty at a freshman college level. Include 10 questions in the quiz, then write it to a file called `math_quiz.txt`."

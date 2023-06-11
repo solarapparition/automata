@@ -40,7 +40,7 @@ def create_automaton_prompt(
     self_imperatives: List[str],
     role_info: Dict[str, str],
     sub_automata: List[Tool],
-    requester: str,
+    requester_full_name: str,
     background_knowledge: Union[str, None],
 ) -> PromptTemplate:
     """Put together a prompt for an automaton."""
@@ -65,7 +65,7 @@ def create_automaton_prompt(
         AUTOMATON_AFFIXES["suffix"]
         .replace("{instructions}", instructions)
         .replace("{objective}", objective)
-        .replace("{requester}", get_full_name(requester))
+        .replace("{requester}", requester_full_name)
     )
     prompt = AutomatonAgent.create_prompt(
         sub_automata,
@@ -80,14 +80,14 @@ def create_automaton_prompt(
 @lru_cache(maxsize=None)
 def load_automaton(
     automaton_id: str,
+    automata_location: Path,
     requester_session_id: str,
     requester_id: str,
-    automata_location: Path,
 ) -> Automaton:
     """Load an automaton from a YAML file."""
 
-    data = load_automaton_data(automaton_id)
-    automaton_location = automata_location / automaton_id
+    data = load_automaton_data(automata_location / automaton_id)
+    automaton_path = automata_location / automaton_id
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = create_engine(data["engine"])
 
@@ -102,12 +102,13 @@ def load_automaton(
     )
 
     input_validator = load_input_validator(
-        data["input_validator"], input_requirements, automaton_id
+        data["input_validator"], input_requirements, automaton_id, automata_location
     )
 
     def run_builtin_function(*args, **kwargs) -> str:
         run = load_builtin_function(
             automaton_id,
+            automata_location,
             data,
             engine,
             requester_id=requester_id,
@@ -125,7 +126,7 @@ def load_automaton(
         reflect: Union[Callable, None] = load_reflect(
             automata_location / automaton_id, data["reflect"]
         )
-        planner = load_planner(automaton_location, data["planner"])
+        planner = load_planner(automaton_path, data["planner"])
         sub_automata = [
             load_automaton(
                 sub_automata_id,
@@ -136,7 +137,7 @@ def load_automaton(
             for sub_automata_id in data["sub_automata"]
         ]
         create_background_knowledge = load_knowledge(
-            automaton_location,
+            automaton_path,
             data["knowledge"],
         )
         background_knowledge = (
@@ -151,7 +152,7 @@ def load_automaton(
             role_info=get_role_info(data["role"]),
             background_knowledge=background_knowledge,
             sub_automata=sub_automata,
-            requester=requester_id,
+            requester_full_name=get_full_name(requester_id, automata_location),
         )
         # print(prompt.format(input="blah", agent_scratchpad={}))
         # breakpoint()
@@ -194,6 +195,7 @@ def load_automaton(
         add_session_handling(
             runner,
             automaton_id=automaton_id,
+            automata_location=automata_location,
             session_id=self_session_id,
             full_name=full_name,
             requester_id=requester_id,

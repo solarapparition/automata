@@ -2,14 +2,14 @@
 
 import functools
 import json
+from pathlib import Path
 from typing import Callable, Dict, Tuple, Union
 
 from automata.utilities import generate_timestamp_id
-from .config import AUTOMATON_DATA_LOC
 
-def save_event(event: Dict[str, str], automaton_id: str, session_id: str):
+def save_event(event: Dict[str, str], automaton_id: str, automata_location: Path, session_id: str):
     """Save an event to the event log of an automaton."""
-    log_path = AUTOMATON_DATA_LOC / f"{automaton_id}/event_log/{session_id}.jsonl"
+    log_path = automata_location / f"{automaton_id}/event_log/{session_id}.jsonl"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "a", encoding="utf-8") as file:
         file.write(json.dumps(event) + "\n")
@@ -19,6 +19,7 @@ def add_session_handling(
     run: Callable,
     *,
     automaton_id: str,
+    automata_location: Path,
     session_id: str,
     full_name: str,
     input_validator: Union[Callable[[str], Tuple[bool, str]], None],
@@ -51,8 +52,8 @@ def add_session_handling(
             "result": result,
             "timestamp": generate_timestamp_id(),
         }
-        save_event(event, automaton_id, session_id)
-        save_event(event, requester_id, requester_session_id)
+        save_event(event, automaton_id, automata_location, session_id)
+        save_event(event, requester_id, automata_location, requester_session_id)
         return result
 
     return wrapper

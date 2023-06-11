@@ -15,6 +15,4 @@ AUTOMATON_AFFIXES: Dict[str, str] = {
     ).items()
 }
 
-AUTOMATON_DATA_LOC = Path("automaton_data")
-
-resource_metadata = ResourceMetadata("db/resource_metadata.db")
+RESOURCE_METADATA = ResourceMetadata("db/resource_metadata.db")
