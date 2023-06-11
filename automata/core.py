@@ -1,12 +1,13 @@
 """Core automata functionality."""
 
 from functools import lru_cache, partial
+from pathlib import Path
 from typing import Callable, Dict, List, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import Tool
 
-from automata.config import AUTOMATON_AFFIXES, AUTOMATON_DATA_LOC
+from automata.config import AUTOMATON_AFFIXES
 from automata.engines import create_engine
 from automata.builtin_functions import load_builtin_function
 from automata.validation import (
@@ -78,12 +79,15 @@ def create_automaton_prompt(
 
 @lru_cache(maxsize=None)
 def load_automaton(
-    automaton_id: str, requester_session_id: str, requester_id: str
+    automaton_id: str,
+    requester_session_id: str,
+    requester_id: str,
+    automata_location: Path,
 ) -> Automaton:
     """Load an automaton from a YAML file."""
 
     data = load_automaton_data(automaton_id)
-    automaton_location = AUTOMATON_DATA_LOC / automaton_id
+    automaton_location = automata_location / automaton_id
     full_name = f"{data['name']} ({data['role']} {data['rank']})"
     engine = create_engine(data["engine"])
 
@@ -119,7 +123,7 @@ def load_automaton(
             data["output_validator"], request=request, file_name=automaton_id
         )
         reflect: Union[Callable, None] = load_reflect(
-            AUTOMATON_DATA_LOC / automaton_id, data["reflect"]
+            automata_location / automaton_id, data["reflect"]
         )
         planner = load_planner(automaton_location, data["planner"])
         sub_automata = [
@@ -127,6 +131,7 @@ def load_automaton(
                 sub_automata_id,
                 requester_session_id=self_session_id,
                 requester_id=automaton_id,
+                automata_location=automata_location,
             )
             for sub_automata_id in data["sub_automata"]
         ]
@@ -169,7 +174,7 @@ def load_automaton(
 
     if runner_name.endswith(".py"):
         custom_runner: AutomatonRunner = quick_import(
-            AUTOMATON_DATA_LOC / runner_name
+            automata_location / runner_name
         ).run
         runner = partial(
             custom_runner,
