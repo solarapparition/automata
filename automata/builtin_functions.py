@@ -3,11 +3,11 @@
 from functools import partial
 import json
 from pathlib import Path
-from typing import Callable, Union
+from typing import Any, Callable, Mapping, Union
 
 from langchain import LLMChain
 from langchain.agents import load_tools
-from langchain.llms import BaseLLM
+from langchain.llms.base import BaseLLM
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -81,18 +81,26 @@ def run_llm_assistant(action_input: str, engine: BaseLLM) -> str:
 def load_builtin_function(
     self_id: str,
     automata_location: Path,
-    data: dict,
+    _: Mapping[str, Any],
     engine: Union[BaseLLM, None],
     requester_id: Union[str, None] = None,
 ) -> Callable[[str], str]:
     """Load an automaton function, which are basically wrappers around external functionality (including other agents)."""
 
     full_name = get_full_name(self_id, automata_location)
-
+    run: Callable[[str], str]
     if self_id == "llm_assistant":
+        if engine is None:
+            raise ValueError(
+                "Cannot load LLM assistant without an LLM engine. Please provide an LLM engine."
+            )
         run = partial(run_llm_assistant, engine=engine)
 
     elif self_id == "save_text":
+        if requester_id is None:
+            raise ValueError(
+                "Cannot save file without a requester ID. Please provide a requester ID."
+            )
         run = partial(
             save_text_to_workspace, self_name=full_name, workspace_name=requester_id
         )
@@ -101,6 +109,10 @@ def load_builtin_function(
         run = partial(load_workspace_file, self_name=full_name)
 
     elif self_id == "view_workspace":
+        if requester_id is None:
+            raise ValueError(
+                "Cannot view workspace without a requester ID. Please provide a requester ID."
+            )
         run = partial(
             view_workspace_files, self_name=full_name, workspace_name=requester_id
         )
@@ -112,66 +124,13 @@ def load_builtin_function(
         run = load_tools(["human"])[0].run
 
     elif self_id == "finalize":
-        run = (
-            lambda _: None
-        )  # not meant to actually be run; the finalize action should be caught by the parser first
+        # not meant to actually be run; the finalize action should be caught by the parser first
+        run = lambda _: ""
 
     elif self_id == "search":
         run = load_tools(["google-serper"], llm=engine)[0].run
-
-    # elif self_id == "notebook":
-    #     run = partial(open_notebook, self_name=full_name, requester=requester_id)
 
     else:
         raise NotImplementedError(f"Unsupported function name: {self_id}.")
 
     return run
-
-
-# def load_automaton_function(
-#     self_id: str,
-#     data: dict,
-#     engine: Union[BaseLLM, None],
-#     requester_id: Union[str, None] = None,
-# ) -> Callable[[str], str]:
-#     """Load an automaton function, which are basically wrappers around external functionality (including other agents)."""
-
-#     full_name = get_full_name(self_id)
-
-#     if self_id == "llm_assistant":
-#         run = partial(run_llm_assistant, engine=engine)
-
-#     elif self_id == "save_text":
-#         run = partial(
-#             save_text_to_workspace, self_name=full_name, workspace_name=requester_id
-#         )
-
-#     elif self_id == "load_file":
-#         run = partial(load_file, self_name=full_name)
-
-#     elif self_id == "view_workspace":
-#         run = partial(
-#             view_workspace_files, self_name=full_name, workspace_name=requester_id
-#         )
-
-#     elif self_id == "think":
-#         run = lambda thought: f"I must think about my next steps. {thought}"
-
-#     elif self_id == "human":
-#         run = load_tools(["human"])[0].run
-
-#     elif self_id == "finalize":
-#         run = (
-#             lambda _: None
-#         )  # not meant to actually be run; the finalize action should be caught by the parser first
-
-#     elif self_id == "search":
-#         run = load_tools(["google-serper"], llm=engine)[0].run
-
-#     elif self_id == "notebook":
-#         run = partial(open_notebook, self_name=full_name, requester=requester_id)
-
-#     else:
-#         raise NotImplementedError(f"Unsupported function name: {self_id}.")
-
-#     return run
