@@ -13,8 +13,10 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from automata.global_vars import RESOURCE_METADATA
+from automata.resource_metadata import ResourceMetadata
 from automata.loaders import get_full_name
+
+RESOURCE_METADATA = ResourceMetadata("db/resource_metadata.db")
 
 
 def save_text_to_workspace(

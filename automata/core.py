@@ -6,8 +6,8 @@ from typing import Callable, Dict, List, Union
 
 from langchain import LLMChain, PromptTemplate
 from langchain.agents import Tool
+import yaml
 
-from automata.global_vars import AUTOMATON_AFFIXES
 from automata.engines import create_engine
 from automata.builtin_functions import load_builtin_function
 from automata.validation import (
@@ -52,17 +52,22 @@ def create_automaton_prompt(
     instructions = (
         "\n".join([f"- {instruction}" for instruction in instructions]) or "N/A"
     )
+    affixes: Dict[str, str] = {
+        key: val.strip()
+        for key, val in yaml.load(
+            Path("automata/prompts/automaton.yml").read_text(encoding="utf-8"),
+            Loader=yaml.FullLoader,
+        ).items()
+    }
 
-    prefix = AUTOMATON_AFFIXES["prefix"].format(
-        # input_requirements=input_requirements,
+    prefix = affixes["prefix"].format(
         role_description=role_info["description"],
         imperatives=imperatives,
         background_knowledge=background_knowledge,
-        # instructions=instructions,
     )
 
     suffix = (
-        AUTOMATON_AFFIXES["suffix"]
+        affixes["suffix"]
         .replace("{instructions}", instructions)
         .replace("{objective}", objective)
         .replace("{requester}", requester_full_name)
